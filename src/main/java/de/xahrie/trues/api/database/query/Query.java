@@ -25,6 +25,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.mysql.cj.jdbc.exceptions.MysqlDataTruncation;
 import de.xahrie.trues.api.database.connector.Database;
 import de.xahrie.trues.api.database.connector.Listing;
 import de.xahrie.trues.api.database.connector.SQLUtils;
@@ -86,8 +87,16 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
   public static int update(String query, List<Object> parameters) {
     if (Const.SHOW_SQL) new Console(query).debug();
     try (final PreparedStatement statement = Database.connection().getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-      for (int i = 0; i < parameters.size(); i++) statement.setObject(i + 1, parameters.get(i));
+      for (int i = 0; i < parameters.size(); i++)
+        statement.setObject(i + 1, parameters.get(i));
       return statement.executeUpdate();
+    } catch (MysqlDataTruncation exception) {
+      String message = "Query nicht zulässig: " + query + "\nParameters: " +
+                       parameters.stream().map(Object::toString)
+                                 .collect(Collectors.joining(", "));
+      if (!Const.SHOW_SQL) new Console(message).severe(exception);
+      new DevInfo(message).with(Console.class).severe(exception);
+      throw new IllegalArgumentException(exception);
     } catch (SQLException exception) {
       if (!Const.SHOW_SQL) new Console("Query nicht zulässig: " + query).severe(exception);
       new DevInfo("Query nicht zulässig: " + query).with(Console.class).severe(exception);
@@ -201,6 +210,13 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
       if (retry) throw new RuntimeException(exception);
       Database.disconnect();
       return executeUpdate(query, insert, entity, action, otherWise, parameters, true);
+    } catch (MysqlDataTruncation exception) {
+      String message = "Query nicht zulässig: " + query + "\nParameters: " +
+                       parameters.stream().map(Object::toString)
+                                 .collect(Collectors.joining(", "));
+      if (!Const.SHOW_SQL) new Console(message).severe(exception);
+      new DevInfo(message).with(Console.class).severe(exception);
+      throw new IllegalArgumentException(exception);
     } catch (SQLException exception) {
       if (!Const.SHOW_SQL) new Console("Query nicht zulässig: " + query).severe(exception);
       new DevInfo("Query nicht zulässig: " + query).with(Console.class).severe(exception);
