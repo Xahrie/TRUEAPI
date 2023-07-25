@@ -39,7 +39,7 @@ public final class JSON extends JSONObject {
   }
 
   @NonNull
-  private static Path getPath(@NonNull String fileName) throws URISyntaxException, FileNotFoundException {
+  static Path getPath(@NonNull String fileName) throws URISyntaxException, FileNotFoundException {
     if (Files.exists(Paths.get("./resources/"))) {
       return Paths.get("./resources/" + fileName);
     } else {

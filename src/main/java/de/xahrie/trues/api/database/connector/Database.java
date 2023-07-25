@@ -1,5 +1,11 @@
 package de.xahrie.trues.api.database.connector;
 
+import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -12,6 +18,8 @@ import de.xahrie.trues.api.util.io.cfg.JSON;
 import de.xahrie.trues.api.util.io.log.Console;
 import de.xahrie.trues.api.util.io.log.DevInfo;
 import lombok.Data;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
@@ -27,7 +35,41 @@ public final class Database {
     return connection;
   }
 
-  private static DatabaseConnection run() {
+  private static DatabaseConnection run()  {
+    Path folderPath = Paths.get("./resources/");
+    Path configPath = Paths.get("./resources/connect.json");
+    final URL resource = JSON.class.getResource("/connect.json");
+    final DatabaseData databaseData =
+            (Files.exists(folderPath) && Files.exists(configPath)) || resource != null ?
+                    readDatabaseDataFromJson() : readDatabaseDataFromYaml();
+
+    try {
+      Class.forName("com.mysql.cj.jdbc.Driver");
+      final String url = "jdbc:mysql://" + databaseData.server() + ":" + databaseData.port() + "/" +
+                         databaseData.database() + "?sessionVariables=sql_mode=''";
+      final Connection connection = DriverManager.getConnection(url, databaseData.username(), databaseData.password());
+      connection.setAutoCommit(false);
+      return new DatabaseConnection(connection);
+    } catch (ClassNotFoundException | SQLException e) {
+      new Console("SQL konnte nicht gefunden werden").severe(e);
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static DatabaseData readDatabaseDataFromYaml() {
+    ConfigurationSection configurationSection =
+            Bukkit.getPluginManager().getPlugin("TRUEsports").getConfig()
+                  .getConfigurationSection("database");
+    if (configurationSection == null) throw new IllegalArgumentException("Daten sind leer");
+    final String database = configurationSection.getString("database");
+    final String password = configurationSection.getString("password");
+    final int port = configurationSection.getInt("port");
+    final String server = configurationSection.getString("server");
+    final String username = configurationSection.getString("username");
+    return new DatabaseData(database, password, port, server, username);
+  }
+
+  private static DatabaseData readDatabaseDataFromJson() {
     final var json = JSON.read("connect.json");
     final JSONObject dbObject = json.getJSONObject("database");
     final String database = dbObject.getString("database");
@@ -35,17 +77,7 @@ public final class Database {
     final int port = dbObject.getInt("port");
     final String server = dbObject.getString("server");
     final String username = dbObject.getString("username");
-
-    try {
-      Class.forName("com.mysql.cj.jdbc.Driver");
-      final String url = "jdbc:mysql://" + server + ":" + port + "/" + database + "?sessionVariables=sql_mode=''";
-      final Connection connection = DriverManager.getConnection(url, username, password);
-      connection.setAutoCommit(false);
-      return new DatabaseConnection(connection);
-    } catch (ClassNotFoundException | SQLException e) {
-      new Console("SQL konnte nicht gefunden werden").severe(e);
-      throw new RuntimeException(e);
-    }
+    return new DatabaseData(database, password, port, server, username);
   }
 
   public static void disconnect() {
