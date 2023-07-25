@@ -1,18 +1,7 @@
 package de.xahrie.trues.api.database.connector;
 
-import java.io.FileNotFoundException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.List;
-
-import de.xahrie.trues.api.discord.LoadupManager;
 import de.xahrie.trues.api.database.query.Query;
+import de.xahrie.trues.api.discord.LoadupManager;
 import de.xahrie.trues.api.discord.user.DiscordUser;
 import de.xahrie.trues.api.util.io.cfg.JSON;
 import de.xahrie.trues.api.util.io.log.Console;
@@ -22,6 +11,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
+
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.List;
 
 
 public final class Database {
