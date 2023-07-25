@@ -362,7 +362,7 @@ public class Query<T extends Id> extends SimpleQueryFormer<T> {
   @NotNull
   private Map<String, Class<?>> determineSubClasses() {
     final Map<String, Class<?>> classes = new HashMap<>();
-    for (final Class<?> aClass : new Reflections("de.zahrie.trues").get(Scanners.SubTypes.of(targetId).asClass())) {
+    for (final Class<?> aClass : new Reflections("de.xahrie.trues").get(Scanners.SubTypes.of(targetId).asClass())) {
       final Table annotation = aClass.getAnnotation(Table.class);
       if (annotation != null) classes.put(annotation.department(), aClass);
     }
