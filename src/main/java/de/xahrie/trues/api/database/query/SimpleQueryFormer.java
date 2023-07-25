@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.UnknownFormatConversionException;
 import java.util.stream.Collectors;
 
@@ -174,6 +175,7 @@ public class SimpleQueryFormer<T extends Id> extends SimpleAbstractQuery<T> {
       else if (parameter instanceof Short paramShort) statement.setShort(pos, paramShort);
       else if (parameter instanceof Integer paramInteger) statement.setInt(pos, paramInteger);
       else if (parameter instanceof Long paramLong) statement.setLong(pos, paramLong);
+      else if (parameter instanceof UUID paramUUID) statement.setString(pos, paramUUID.toString());
       else {
         final RuntimeException ex = new UnknownFormatConversionException("Das Format ist nicht bekannt.");
         new DevInfo(parameter + " is " + parameter.getClass().getSimpleName()).severe(ex);
