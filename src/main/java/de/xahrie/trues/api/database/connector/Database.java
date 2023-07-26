@@ -1,6 +1,7 @@
 package de.xahrie.trues.api.database.connector;
 
 import java.net.URL;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,20 +58,24 @@ public final class Database {
         .filter(section -> section.contains("database") && section.contains("password") &&
             section.contains("port") && section.contains("server") && section.contains("username"))
         .map(section -> new DatabaseData(
-            section.getString("database"), section.getString("passwort"), section.getInt("port"),
+            section.getString("database"), section.getString("password"), section.getInt("port"),
             section.getString("server"), section.getString("username")
         )).findFirst().orElse(null);
   }
 
   private static DatabaseData readDatabaseDataFromJson() {
-    final var json = JSON.read("connect.json");
-    final JSONObject dbObject = json.getJSONObject("database");
-    final String database = dbObject.getString("database");
-    final String password = dbObject.getString("password");
-    final int port = dbObject.getInt("port");
-    final String server = dbObject.getString("server");
-    final String username = dbObject.getString("username");
-    return new DatabaseData(database, password, port, server, username);
+    try {
+      final var json = JSON.read("connect.json");
+      final JSONObject dbObject = json.getJSONObject("database");
+      final String database = dbObject.getString("database");
+      final String password = dbObject.getString("password");
+      final int port = dbObject.getInt("port");
+      final String server = dbObject.getString("server");
+      final String username = dbObject.getString("username");
+      return new DatabaseData(database, password, port, server, username);
+    } catch (FileSystemNotFoundException ignored) {
+      return readDatabaseDataFromYaml();
+    }
   }
 
   public static void disconnect() {
