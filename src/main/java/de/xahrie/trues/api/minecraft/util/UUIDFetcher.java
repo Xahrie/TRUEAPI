@@ -2,10 +2,16 @@ package de.xahrie.trues.api.minecraft.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import de.xahrie.trues.api.util.Util;
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,24 +20,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+@Getter
 public class UUIDFetcher {
-
-  /**
-   * Date when name changes were introduced
-   * @see UUIDFetcher#getUUIDAt(String, long)
-   */
-  public static final long FEBRUARY_2015 = 1422748800000L;
-
-
-  private static Gson gson = new GsonBuilder().registerTypeAdapter(UUID.class, new UUIDTypeAdapter()).create();
-
-  private static final String UUID_URL = "https://api.mojang.com/users/profiles/minecraft/%s?at=%d";
-  private static final String NAME_URL = "https://api.mojang.com/user/profile/%s";
-
-  private static Map<String, UUID> uuidCache = new HashMap<>();
-  private static Map<UUID, String> nameCache = new HashMap<>();
-
-  private static ExecutorService pool = Executors.newCachedThreadPool();
+  private static final Gson gson = new GsonBuilder().registerTypeAdapter(UUID.class, new UUIDTypeAdapter()).create();
+  private static final Map<String, UUID> uuidCache = new HashMap<>();
+  private static final Map<UUID, String> nameCache = new HashMap<>();
+  private static final ExecutorService pool = Executors.newCachedThreadPool();
 
   private String name;
   private UUID id;
@@ -53,42 +47,14 @@ public class UUIDFetcher {
    * @return The uuid
    */
   public static UUID getUUID(String name) {
-    return getUUIDAt(name, System.currentTimeMillis());
-  }
-
-  /**
-   * Fetches the uuid synchronously for a specified name and time and passes the result to the consumer
-   *
-   * @param name The name
-   * @param timestamp Time when the player had this name in milliseconds
-   * @param action Do what you want to do with the uuid her
-   */
-  public static void getUUIDAt(String name, long timestamp, Consumer<UUID> action) {
-    pool.execute(() -> action.accept(getUUIDAt(name, timestamp)));
-  }
-
-  /**
-   * Fetches the uuid synchronously for a specified name and time
-   *
-   * @param name The name
-   * @param timestamp Time when the player had this name in milliseconds
-   * @see UUIDFetcher#FEBRUARY_2015
-   */
-  public static UUID getUUIDAt(String name, long timestamp) {
     name = name.toLowerCase();
-    if (uuidCache.containsKey(name)) {
-      return uuidCache.get(name);
-    }
+    if (uuidCache.containsKey(name)) return uuidCache.get(name);
+
     try {
-      HttpURLConnection connection = (HttpURLConnection) new URL(String.format(UUID_URL, name, timestamp/1000)).openConnection();
-      connection.setReadTimeout(5000);
-      UUIDFetcher data = gson.fromJson(new BufferedReader(new InputStreamReader(connection.getInputStream())), UUIDFetcher.class);
-
-      uuidCache.put(name, data.id);
-      nameCache.put(data.id, data.name);
-
-      return data.id;
-    } catch (Exception e) {
+      final URL url = new URL("https://api.mojang.com/users/profiles/minecraft/%s" + name);
+      final UUIDFetcher fetcher = getUUIDFetcher(url);
+      return Util.avoidNull(fetcher, UUIDFetcher::getId);
+    } catch (MalformedURLException e) {
       e.printStackTrace();
     }
 
@@ -111,23 +77,35 @@ public class UUIDFetcher {
    * @param uuid The uuid
    * @return The name
    */
+  @Nullable
   public static String getName(UUID uuid) {
-    if (nameCache.containsKey(uuid)) {
-      return nameCache.get(uuid);
-    }
+    if (nameCache.containsKey(uuid)) return nameCache.get(uuid);
+
     try {
-      HttpURLConnection connection = (HttpURLConnection) new URL(String.format(NAME_URL, UUIDTypeAdapter.fromUUID(uuid))).openConnection();
-      connection.setReadTimeout(5000);
-      UUIDFetcher currentNameData = gson.fromJson(new BufferedReader(new InputStreamReader(connection.getInputStream())), UUIDFetcher.class);
-
-      uuidCache.put(currentNameData.name.toLowerCase(), uuid);
-      nameCache.put(uuid, currentNameData.name);
-
-      return currentNameData.name;
-    } catch (Exception e) {
+      final URL url = new URL("https://api.mojang.com/user/profile/" + UUIDTypeAdapter.fromUUID(uuid));
+      final UUIDFetcher fetcher = getUUIDFetcher(url);
+      return Util.avoidNull(fetcher, UUIDFetcher::getName);
+    } catch (MalformedURLException e) {
       e.printStackTrace();
     }
+    return null;
+  }
 
+  @Nullable
+  private static UUIDFetcher getUUIDFetcher(@NotNull URL url) {
+    try {
+      final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setReadTimeout(5000);
+      final InputStreamReader input = new InputStreamReader(connection.getInputStream());
+      final UUIDFetcher uuidFetcher = gson.fromJson(new BufferedReader(input), UUIDFetcher.class);
+      if (uuidFetcher != null) {
+        uuidCache.put(uuidFetcher.name.toLowerCase(), uuidFetcher.id);
+        nameCache.put(uuidFetcher.id, uuidFetcher.name);
+      }
+      return uuidFetcher;
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     return null;
   }
 }
