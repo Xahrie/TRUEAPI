@@ -73,7 +73,7 @@ public class TeamInfo {
   }
 
   private static Message findOrCreate(OrgaTeam orgaTeam) {
-    final TeamChannel teamChannel = orgaTeam.getChannels().get(TeamChannelType.INFO);
+    final TeamChannel teamChannel = orgaTeam.getChannels().get(TeamChannelType.INFO, false);
     if (teamChannel == null) return null;
     final MessageChannel messageChannel = (MessageChannel) teamChannel.getChannel();
     return MessageHistory.getHistoryFromBeginning(messageChannel).complete().getRetrievedHistory().stream()
@@ -86,7 +86,7 @@ public class TeamInfo {
   }
 
   void create() {
-    final TeamChannel teamChannel = orgaTeam.getChannels().get(TeamChannelType.INFO);
+    final TeamChannel teamChannel = orgaTeam.getChannels().get(TeamChannelType.INFO, false);
     if (teamChannel == null) return;
 
     final MessageChannel messageChannel = (MessageChannel) teamChannel.getChannel();

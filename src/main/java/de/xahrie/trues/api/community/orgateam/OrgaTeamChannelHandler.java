@@ -21,14 +21,20 @@ import org.jetbrains.annotations.Nullable;
 @RequiredArgsConstructor
 public class OrgaTeamChannelHandler {
   private final OrgaTeam team;
+
+  @Nullable
+  public TeamChannel get(TeamChannelType teamChannelType, boolean create) {
+    final TeamChannel channel = getExistingChannelOf(teamChannelType);
+    return channel == null ? (create ? createChannel(teamChannelType) : null) : channel;
+  }
+
   /**
    * Erhalte {@link TeamChannel} nach {@link TeamChannelType} <br>
    * Ist der Channel nicht vorhanden wird er erstellt
    */
   @Nullable
   public TeamChannel get(TeamChannelType teamChannelType) {
-    final TeamChannel channel = getExistingChannelOf(teamChannelType);
-    return channel == null ? createChannel(teamChannelType) : channel;
+    return get(teamChannelType, true);
   }
 
   void updateChannels() {
