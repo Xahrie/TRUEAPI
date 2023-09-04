@@ -38,8 +38,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 public record RiotPlayerAnalyzer(Player player, List<Performance> playedPerformances) {
   private static final List<Integer> todayAnalyzedPlayers =
@@ -83,11 +85,8 @@ public record RiotPlayerAnalyzer(Player player, List<Performance> playedPerforma
     final var historyBuilder = gameType.getMatchHistory(summoner, player);
     if (analyzeGames(historyBuilder, gameType)) {
       final PlayerRank old = player.getRanks().getCurrent();
-      final Rank.RankTier tier = old.getRank().tier();
-      final Rank.Division division = old.getRank().division();
-      final short points = old.getRank().points();
       final PlayerRank rank = new PlayerHandler(null, player).updateElo();
-      handleNotifier(tier, division, points, rank);
+      handleNotifier(old.getRank(), rank);
     } else player.getRanks().createRank();
 
     AnalyzeManager.delete(player);
@@ -133,11 +132,10 @@ public record RiotPlayerAnalyzer(Player player, List<Performance> playedPerforma
     return hasPlayedRanked;
   }
 
-  private void handleNotifier(Rank.RankTier tier, Rank.Division division, short points,
-          @NotNull PlayerRank playerRank) {
+  private void handleNotifier(@NotNull Rank oldRank, @NotNull PlayerRank playerRank) {
     final DiscordUser user = player.getDiscordUser();
-
-    int diff = playerRank.getRank().getMMR() - new Rank(tier, division, points).getMMR();
+    final Rank newRank = playerRank.getRank();
+    int diff = newRank.getMMR() - oldRank.getMMR();
     if (user == null) return;
     if (!user.isNotifyRank()) return;
 
@@ -151,7 +149,7 @@ public record RiotPlayerAnalyzer(Player player, List<Performance> playedPerforma
                    .sendMessage(message).queue();
       description = "Placements beendet: " + winrate.format(Format.ADDITIONAL);
     } else {
-      description = "SoloQueue: " + playerRank.getRank().toString() + " - **" +
+      description = "SoloQueue: " + newRank + " - **" +
                     playerRank.getWins() + "** Siege - **" + playerRank.getLosses() +
                     "** Niederlagen (" + playerRank.getWinrate() .getWinrate() + ")";
     }
@@ -181,14 +179,8 @@ public record RiotPlayerAnalyzer(Player player, List<Performance> playedPerforma
                     .sendMessageEmbeds(embedBuilder.build()).queue();
     }
 
-    final Rank rank = playerRank.getRank();
-    if (!(rank.tier().equals(tier) && rank.division().equals(division)) && Const.RANKED_STATE.ordinal() < 2) {
-      if (rank.tier().equals(Rank.RankTier.UNRANKED)) return;
-
-      final String message = user.getMention() + " (" + player.getSummonerName() + ") hat einen neuen Rank erreicht\n" +
-                       tier.toString() + " " + division.toString() + " --> " + rank;
-      Jinx.instance.getChannels().getTextChannel(DefinedTextChannel.RANKED).sendMessage(message).queue();
-    }
+    RankupHandler.handleRankup(oldRank, playerRank, user);
+    RankupHandler.sendRankupInfo();
   }
 
   public void analyzeMastery() {

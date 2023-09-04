@@ -1,5 +1,8 @@
 package de.xahrie.trues.api.coverage.player.model;
 
+import java.util.Objects;
+
+import com.merakianalytics.orianna.types.common.Tier;
 import de.xahrie.trues.api.database.connector.Listing;
 import de.xahrie.trues.api.util.StringUtils;
 import lombok.Getter;
@@ -30,6 +33,29 @@ public record Rank(RankTier tier, Division division, short points) implements Co
   public int getMMR() {
     return (tier.ordinal() >= RankTier.MASTER.ordinal() ? RankTier.MASTER.ordinal() * 400 : tier.ordinal() * 400 + division.getPoints())
         + points;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    final Rank rank = (Rank) o;
+    return points == rank.points && tier == rank.tier && division == rank.division;
+  }
+
+  public boolean like(Rank rank) {
+    if (this == rank) return true;
+    if (rank == null) return false;
+    return tier == rank.tier && division == rank.division;
+  }
+
+  public boolean like(RankTier tier, Division division) {
+    return this.tier == tier && this.division == division;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(tier, division, points);
   }
 
   @Override

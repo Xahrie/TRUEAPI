@@ -24,7 +24,7 @@ public class Const {
   public static final String SCHEDULING_PREFIX = "<--";
   public static final boolean SHOW_SQL = false;
   public static final String THREAD_CHANNEL_START = "Scouting vs. ";
-  public static final RankedState RANKED_STATE = RankedState.RANKUPS;
+  public static final RankedState RANKED_STATE = RankedState.DAILY;
 
   public static boolean check() {
     return true;
