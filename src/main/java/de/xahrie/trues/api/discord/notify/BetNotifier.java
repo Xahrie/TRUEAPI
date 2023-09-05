@@ -28,7 +28,7 @@ public class BetNotifier extends Notifier {
           "** endet " + TimeFormat.DISCORD.of(start) +
           ".\nDu kannst deine Wette mit <ID>: <Ergebnis mit Minuszeichen getrennt> abgeben. Beispiel: `123: 3-2`" +
           "\n\n_Wenn du diese Nachricht nicht mehr sehen möchtest nutze auf dem Discord-Server den Command " +
-          "/settings tippspiel_.";
+          "/settings tippspiel (aus, Worlds, Intern, ein)_.";
       new Query<>(DiscordUser.class).where(Condition.Comparer.GREATER_EQUAL, "tippspiel", 2)
           .entityList().stream().filter(user -> user.getBet(match) == null).forEach(user -> user.dm(message));
     }

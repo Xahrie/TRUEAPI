@@ -172,6 +172,13 @@ public class DiscordUser implements Entity<DiscordUser> {
     this.lastTimeJoined = lastTimeJoined;
   }
 
+  public void setBetStatus(BetStatus betStatus) {
+    if (betStatus != null && this.betStatus != betStatus) {
+      new Query<>(DiscordUser.class).col("tippspiel", betStatus).update(id);
+      this.betStatus = betStatus;
+    }
+  }
+
   public List<DiscordUserGroup> getGroups() {
     return new Query<>(DiscordUserGroup.class).where("discord_user", this).entityList();
   }
