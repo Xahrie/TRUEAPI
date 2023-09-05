@@ -9,6 +9,7 @@ import de.xahrie.trues.api.coverage.playday.Playday;
 import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.datatypes.calendar.TimeRange;
+import de.xahrie.trues.api.discord.notify.NotificationManager;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +42,13 @@ public abstract class LeagueMatch extends Match implements AScheduleable, ATourn
     this.matchIndex = matchIndex;
     this.matchId = matchId;
     this.range = timeRange;
+  }
+
+  public void createNotifier() {
+    if (getOrgaTeams().isEmpty()) return;
+    if (!LocalDateTime.now().plusDays(2).isAfter(start)) return;
+
+    NotificationManager.addNotifiersFor(this);
   }
 
   @Override

@@ -73,6 +73,7 @@ public class OrgaMatch extends LeagueMatch implements Entity<OrgaMatch> {
       if (home.getId() != 0 && guest.getId() != 0) this.participators = new Participator[]{home, guest};
       else this.participators = null;
     }
+    createNotifier();
     return match;
   }
 

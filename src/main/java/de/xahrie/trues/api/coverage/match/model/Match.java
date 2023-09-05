@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import de.xahrie.trues.api.coverage.participator.model.Participator;
 import de.xahrie.trues.api.calendar.Cast;
 import de.xahrie.trues.api.calendar.MatchCalendar;
 import de.xahrie.trues.api.community.betting.Bet;
@@ -13,15 +12,20 @@ import de.xahrie.trues.api.coverage.match.MatchResult;
 import de.xahrie.trues.api.coverage.match.log.EventStatus;
 import de.xahrie.trues.api.coverage.match.log.MatchLog;
 import de.xahrie.trues.api.coverage.match.log.MatchLogAction;
+import de.xahrie.trues.api.coverage.participator.model.Participator;
 import de.xahrie.trues.api.coverage.playday.Playday;
+import de.xahrie.trues.api.database.connector.SQLUtils;
 import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Id;
 import de.xahrie.trues.api.database.query.Query;
+import de.xahrie.trues.api.discord.builder.embed.EmbedFieldBuilder;
+import de.xahrie.trues.api.discord.user.DiscordUser;
 import de.xahrie.trues.api.riot.game.Game;
 import de.xahrie.trues.api.util.Util;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,7 +83,7 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
   protected MatchResult matchResult;
 
   public MatchResult getResult() {
-    if (matchResult == null) this.matchResult = MatchResult.fromResultString(result,this);
+    if (matchResult == null) this.matchResult = MatchResult.fromResultString(result, this);
     return matchResult;
   }
 
@@ -142,6 +146,7 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
 
   /**
    * Für Result setzen
+   *
    * @param result ResultString
    */
   public void updateResult(@NonNull String result) {
@@ -156,7 +161,45 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
     getGuest().setWins(result.getGuestScore());
     if (matchResult.getPlayed()) {
       setStatus(EventStatus.PLAYED);
-      if (isBetable()) analyseBets();
+      if (isBetable())
+        analyseBets();
+      analyseBets1();
+    }
+  }
+
+  private void analyseBets1() {
+    final List<Bet> bets = new Query<>(Bet.class).where("coverage", this.getId())
+        .and("bet_amount", 1).entityList();
+    for (final Bet bet : bets) {
+      final String outcome = bet.getOutcome().replace("-", ":");
+      final int real = matchResult.getHomeScore() - matchResult.getGuestScore();
+      final MatchResult guessedResult = MatchResult.fromResultString(outcome, null);
+      assert guessedResult != null;
+      final int guessed = guessedResult.getHomeScore() - guessedResult.getGuestScore();
+      if ((real <= 0 || guessed <= 0) && (real >= 0 || guessed >= 0) && (real != 0 || guessed != 0)) {
+        return;
+      }
+      int amount = format.ordinal() + 1;
+      if (result.equals(outcome))
+        amount += switch (format) {
+          case BEST_OF_THREE -> 2;
+          case BEST_OF_FIVE -> 5;
+          default -> 0;
+        };
+      bet.setDifference(amount);
+      bet.getUser().dm("Du hast für deinen Tipp %d Punkte erhalten".formatted(amount));
+      final List<Object[]> list = new Query<>(DiscordUser.class,
+          "SELECT discord_user, sum(amount) FROM bet " +
+              "INNER JOIN coverage c ON coverage=c.coverage_id " +
+              "WHERE c.coverage_start > ? " +
+              "GROUP BY discord_user ORDER By SUM(bet_difference) DESC").list(List.of(LocalDateTime.now().minusYears(1)));
+      final EmbedBuilder builder = new EmbedBuilder().setTitle("Punktetabelle").setTitle("letzte 365 Tage");
+      new EmbedFieldBuilder<>(list)
+          .add("Name", objects -> new Query<>(DiscordUser.class).entity(SQLUtils.intValue(objects[0])).getMention())
+          .add("Punkte", objects -> String.valueOf(SQLUtils.intValue(objects[1]))).build().forEach(builder::addField);
+      bet.getUser().getMember().getUser().openPrivateChannel()
+          .flatMap(privateChannel -> privateChannel.sendMessageEmbeds(builder.build()))
+          .queue();
     }
   }
 
@@ -224,6 +267,6 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
 
   @Override
   public boolean isBetable() {
-    return rateOffset != null;
+    return rateOffset != null && rateOffset < 0;
   }
 }

@@ -44,8 +44,6 @@ public record Rank(RankTier tier, Division division, short points) implements Co
   }
 
   public boolean like(Rank rank) {
-    if (this == rank) return true;
-    if (rank == null) return false;
     return tier == rank.tier && division == rank.division;
   }
 

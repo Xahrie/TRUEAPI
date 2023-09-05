@@ -8,11 +8,15 @@ import java.util.List;
 
 import de.xahrie.trues.api.calendar.TeamCalendar;
 import de.xahrie.trues.api.community.member.Membership;
+import de.xahrie.trues.api.coverage.ABetable;
+import de.xahrie.trues.api.coverage.match.model.Match;
 import de.xahrie.trues.api.coverage.participator.model.Participator;
 import de.xahrie.trues.api.database.query.Condition;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.datatypes.calendar.DateTimeUtils;
+import de.xahrie.trues.api.datatypes.collections.SortedList;
 import de.xahrie.trues.api.discord.user.DiscordUser;
+import de.xahrie.trues.api.util.Util;
 import lombok.experimental.ExtensionMethod;
 
 @ExtensionMethod(DateTimeUtils.class)
@@ -30,6 +34,12 @@ public class NotificationManager {
                                     "LEFT JOIN orga_team ot on coverage_team.team = ot.team INNER JOIN coverage c on coverage_team.coverage = c.coverage_id " +
                                     "WHERE orga_team_id is not null and coverage_start between now() and ?")
         .entityList(List.of(localDateTime)).forEach(NotificationManager::addNotifiersFor);
+    new Query<>(Match.class, "SELECT * FROM coverage_team " +
+        "INNER JOIN orga_team ot on coverage_team.team = ot.team " +
+        "INNER JOIN coverage c on coverage_team.coverage = c.coverage_id " +
+        "WHERE orga_team_id is not null and coverage_start between ? and ?")
+        .entityList(SortedList.of(LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2)))
+        .forEach(NotificationManager::addNotifiersFor);
   }
 
   public static void addNotifiersFor(TeamCalendar calendar) {
@@ -59,7 +69,14 @@ public class NotificationManager {
         notifiers.add(notifier);
       }
     }
+  }
 
+  public static void addNotifiersFor(ABetable betable) {
+    if (betable instanceof Match match) {
+      final int offset = Math.abs(Util.avoidNull((int) match.getRateOffset(), 0));
+      final LocalDateTime start = match.getStart().minusMinutes(offset);
+      notifiers.add(new BetNotifier(start.toLocalTime(), betable));
+    }
   }
 
   public static void sendNotifications() {

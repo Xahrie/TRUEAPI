@@ -82,6 +82,7 @@ public class PRMMatch extends LeagueMatch implements Entity<PRMMatch> {
       if (home.getId() != 0 && guest.getId() != 0) this.participators = new Participator[]{home, guest};
       else this.participators = null;
     }
+    createNotifier();
     return match;
   }
 

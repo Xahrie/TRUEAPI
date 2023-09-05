@@ -3,13 +3,19 @@ package de.xahrie.trues.api.discord.user;
 import de.xahrie.trues.api.calendar.scheduling.SchedulingHandler;
 import de.xahrie.trues.api.community.application.ApplicationHandler;
 import de.xahrie.trues.api.community.application.TeamRole;
+import de.xahrie.trues.api.community.betting.Bet;
+import de.xahrie.trues.api.community.betting.BetFactory;
+import de.xahrie.trues.api.community.betting.BetStatus;
 import de.xahrie.trues.api.community.member.Membership;
+import de.xahrie.trues.api.coverage.ABetable;
+import de.xahrie.trues.api.coverage.match.model.Match;
 import de.xahrie.trues.api.coverage.player.model.Player;
 import de.xahrie.trues.api.database.connector.SQLUtils;
 import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Entity;
 import de.xahrie.trues.api.database.query.ModifyOutcome;
 import de.xahrie.trues.api.database.query.Query;
+import de.xahrie.trues.api.database.query.SQLEnum;
 import de.xahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.xahrie.trues.api.datatypes.calendar.TimeRange;
 import de.xahrie.trues.api.discord.group.DiscordGroup;
@@ -53,6 +59,7 @@ public class DiscordUser implements Entity<DiscordUser> {
   private short notification = 0; // notification
   private LocalDate birthday; // birthday
   private boolean notifyRank = true; // notify_rank
+  private BetStatus betStatus = BetStatus.NONE;
 
   public DiscordUser(long discordId, String nickname) {
     this.discordId = discordId;
@@ -61,7 +68,7 @@ public class DiscordUser implements Entity<DiscordUser> {
 
   public DiscordUser(int id, long discordId, String nickname, int points, int messagesSent,
           int digitsWritten, int secondsOnline, boolean active, LocalDateTime lastTimeJoined,
-          Integer acceptedBy, short notification, LocalDate birthday, boolean notifyRank) {
+          Integer acceptedBy, short notification, LocalDate birthday, boolean notifyRank, BetStatus betStatus) {
     this.id = id;
     this.discordId = discordId;
     this.nickname = nickname;
@@ -75,6 +82,7 @@ public class DiscordUser implements Entity<DiscordUser> {
     this.notification = notification;
     this.birthday = birthday;
     this.notifyRank = notifyRank;
+    this.betStatus = betStatus;
   }
 
   @Nullable
@@ -136,7 +144,8 @@ public class DiscordUser implements Entity<DiscordUser> {
         (Integer) objects.get(9),
         objects.get(10).shortValue(),
         (LocalDate) objects.get(11),
-        (boolean) objects.get(12)
+        (boolean) objects.get(12),
+        new SQLEnum<>(BetStatus.class).of(objects.get(13))
     );
   }
 
@@ -296,5 +305,9 @@ public class DiscordUser implements Entity<DiscordUser> {
     if (player == null) return ModifyOutcome.REMOVED;
     player.setDiscordUser(this);
     return wasChanged ? ModifyOutcome.CHANGED : ModifyOutcome.ADDED;
+  }
+
+  public Bet getBet(Match match) {
+    return BetFactory.getBet(this, match);
   }
 }
