@@ -1,10 +1,13 @@
 package de.xahrie.trues.api.minecraft.util;
 
+import de.xahrie.trues.api.database.connector.DatabaseData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class MCUtil {
   public static String camel(String text, boolean replace) {
@@ -38,5 +41,17 @@ public class MCUtil {
     if (sleeping.size() >= Bukkit.getOnlinePlayers().size() * .34) {
       Bukkit.broadcastMessage(ChatColor.WHITE + "SLEEPY TIME!!!");
     }
+  }
+
+  private static DatabaseData readDatabaseDataFromYaml() {
+    return Arrays.stream(Bukkit.getPluginManager().getPlugins())
+        .map(plugin -> plugin.getConfig().getConfigurationSection("database"))
+        .filter(Objects::nonNull)
+        .filter(section -> section.contains("database") && section.contains("password") &&
+            section.contains("port") && section.contains("server") && section.contains("username"))
+        .map(section -> new DatabaseData(
+            section.getString("database"), section.getString("password"), section.getInt("port"),
+            section.getString("server"), section.getString("username")
+        )).findFirst().orElse(null);
   }
 }

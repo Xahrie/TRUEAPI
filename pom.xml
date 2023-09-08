@@ -2,9 +2,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.xahrie.trues</groupId>
-    <artifactId>true-api</artifactId>
-    <version>3.3.15</version>
-    <name>true-api</name>
+    <artifactId>trueapi</artifactId>
+    <version>3.3.16</version>
+    <name>trueapi</name>
 
     <properties>
         <maven.compiler.source>19</maven.compiler.source>
@@ -51,7 +51,7 @@
                         <ejbModule>
                             <groupId>de.xahrie.trues</groupId>
                             <artifactId>trueapi</artifactId>
-                            <bundleFileName>trueapi-3.3.15.jar</bundleFileName>
+                            <bundleFileName>trueapi-3.3.16.jar</bundleFileName>
                         </ejbModule>
                     </modules> -->
                 </configuration>
