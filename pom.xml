@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.xahrie.trues</groupId>
     <artifactId>true-api</artifactId>
-    <version>3.3.14</version>
+    <version>3.3.15</version>
     <name>true-api</name>
 
     <properties>
@@ -37,6 +37,7 @@
 
 
     <build>
+        <finalName>trueapi</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -46,6 +47,13 @@
                     <encoding>UTF-8</encoding>
                     <source>19</source>
                     <target>19</target>
+                    <!-- <modules>
+                        <ejbModule>
+                            <groupId>de.xahrie.trues</groupId>
+                            <artifactId>trueapi</artifactId>
+                            <bundleFileName>trueapi-3.3.15.jar</bundleFileName>
+                        </ejbModule>
+                    </modules> -->
                 </configuration>
             </plugin>
         </plugins>

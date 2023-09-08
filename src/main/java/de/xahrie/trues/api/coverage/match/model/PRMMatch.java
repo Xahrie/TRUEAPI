@@ -33,14 +33,16 @@ public class PRMMatch extends LeagueMatch implements Entity<PRMMatch> {
     this(matchday, MatchFormat.TWO_GAMES, start, (short) 0, EventStatus.CREATED, "keine Infos", true, "-:-", league, league.getMatches().size() + 1, matchId, schedulingRange);
   }
 
-  public PRMMatch(@Nullable Playday playday, @NotNull MatchFormat format, @NotNull LocalDateTime start, Short rateOffset,
-                  @NotNull EventStatus status, @NotNull String lastMessage, boolean active, @NotNull String result,
-                  @NotNull PRMLeague league, int matchIndex, int matchId, @NotNull TimeRange timeRange) {
+  public PRMMatch(@Nullable Playday playday, @NotNull MatchFormat format, @NotNull LocalDateTime start,
+                  @Nullable Short rateOffset, @NotNull EventStatus status, @NotNull String lastMessage,
+                  boolean active, @NotNull String result, @NotNull PRMLeague league, int matchIndex,
+                  int matchId, @NotNull TimeRange timeRange) {
     super(playday, format, start, rateOffset, status, lastMessage, active, result, league, matchIndex, matchId, timeRange);
   }
 
-  private PRMMatch(int id, Integer playdayId, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status,
-                   String lastMessage, boolean active, String result, int leagueId, int matchIndex, int matchId, TimeRange timeRange) {
+  private PRMMatch(int id, Integer playdayId, MatchFormat format, LocalDateTime start, Short rateOffset,
+                   EventStatus status, String lastMessage, boolean active, String result, int leagueId,
+                   int matchIndex, int matchId, TimeRange timeRange) {
     super(id, playdayId, format, start, rateOffset, status, lastMessage, active, result, leagueId, matchIndex, matchId, timeRange);
   }
 
@@ -54,7 +56,7 @@ public class PRMMatch extends LeagueMatch implements Entity<PRMMatch> {
         objects.get(2).intValue(),
         new SQLEnum<>(MatchFormat.class).of(objects.get(3)),
         (LocalDateTime) objects.get(4),
-        objects.get(5).shortValue(),
+        SQLUtils.shortValue(objects.get(5)),
         new SQLEnum<>(EventStatus.class).of(objects.get(6)),
         (String) objects.get(7),
         (boolean) objects.get(8),
@@ -69,9 +71,11 @@ public class PRMMatch extends LeagueMatch implements Entity<PRMMatch> {
   @Override
   public PRMMatch create() {
     final PRMMatch match = new Query<>(PRMMatch.class).key("match_id", matchId)
-        .col("matchday", playdayId).col("coverage_format", format).col("coverage_start", start).col("rate_offset", rateOffset)
-        .col("status", status).col("last_message", lastMessage).col("active", active).col("result", result).col("coverage_group", leagueId)
-        .col("coverage_index", matchIndex).col("scheduling_start", range.getStartTime()).col("scheduling_end", range.getEndTime())
+        .col("matchday", playdayId).col("coverage_format", format).col("coverage_start", start)
+        .col("rate_offset", rateOffset).col("status", status).col("last_message", lastMessage)
+        .col("active", active).col("result", result).col("coverage_group", leagueId)
+        .col("coverage_index", matchIndex).col("scheduling_start", range.getStartTime())
+        .col("scheduling_end", range.getEndTime())
         .insert(this);
     if (match.getLogs().stream().noneMatch(log -> log.getAction().equals(MatchLogAction.CREATE))) {
       new MatchLog(this, MatchLogAction.CREATE, "Spiel erstellt", null).create();

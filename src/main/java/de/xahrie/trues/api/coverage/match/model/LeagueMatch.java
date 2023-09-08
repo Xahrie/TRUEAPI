@@ -22,10 +22,10 @@ public abstract class LeagueMatch extends Match implements AScheduleable, ATourn
   protected final int matchId;
   protected TimeRange range;
 
-  public LeagueMatch(@Nullable Playday playday, @NotNull MatchFormat format, @NotNull LocalDateTime start, Short rateOffset,
-                     @NotNull EventStatus status, @NotNull String lastMessage, boolean active, @NotNull String result,
-                     @NotNull
-                     AbstractLeague league, int matchIndex, @NotNull Integer matchId, @NotNull TimeRange timeRange) {
+  public LeagueMatch(@Nullable Playday playday, @NotNull MatchFormat format, @NotNull LocalDateTime start,
+                     @Nullable Short rateOffset, @NotNull EventStatus status, @NotNull String lastMessage,
+                     boolean active, @NotNull String result, @NotNull AbstractLeague league, int matchIndex,
+                     @NotNull Integer matchId, @NotNull TimeRange timeRange) {
     super(playday, format, start, rateOffset, status, lastMessage, active, result);
     this.league = league;
     this.leagueId = league.getId();
@@ -34,9 +34,9 @@ public abstract class LeagueMatch extends Match implements AScheduleable, ATourn
     this.range = timeRange;
   }
 
-  protected LeagueMatch(int id, Integer playdayId, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status,
-                        String lastMessage, boolean active, String result, int leagueId, int matchIndex, Integer matchId,
-                        TimeRange timeRange) {
+  protected LeagueMatch(int id, Integer playdayId, MatchFormat format, LocalDateTime start, Short rateOffset,
+                        EventStatus status, String lastMessage, boolean active, String result, int leagueId,
+                        int matchIndex, Integer matchId, TimeRange timeRange) {
     super(id, playdayId, format, start, rateOffset, status, lastMessage, active, result);
     this.leagueId = leagueId;
     this.matchIndex = matchIndex;

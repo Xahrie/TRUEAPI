@@ -27,16 +27,18 @@ public class Scrimmage extends Match implements Entity<Scrimmage> {
   private static final long serialVersionUID = -6736012840442317674L;
 
   public Scrimmage(@NotNull LocalDateTime start) {
-    this(PlaydayFactory.current(), MatchFormat.TWO_GAMES, start, (short) 0, EventStatus.CREATED, "keine Infos", true, "-:-");
+    this(PlaydayFactory.current(), MatchFormat.TWO_GAMES, start, (short) 0, EventStatus.CREATED,
+        "keine Infos", true, "-:-");
   }
 
-  public Scrimmage(@Nullable Playday playday, @NotNull MatchFormat format, @NotNull LocalDateTime start, short rateOffset,
-                   @NotNull EventStatus status, @NotNull String lastMessage, boolean active, @NotNull String result) {
+  public Scrimmage(@Nullable Playday playday, @NotNull MatchFormat format, @NotNull LocalDateTime start,
+                   @Nullable Short rateOffset, @NotNull EventStatus status, @NotNull String lastMessage,
+                   boolean active, @NotNull String result) {
     super(playday, format, start, rateOffset, status, lastMessage, active, result);
   }
 
-  private Scrimmage(int id, Integer playdayId, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status,
-                    String lastMessage, boolean active, String result) {
+  private Scrimmage(int id, Integer playdayId, MatchFormat format, LocalDateTime start, Short rateOffset,
+                    EventStatus status, String lastMessage, boolean active, String result) {
     super(id, playdayId, format, start, rateOffset, status, lastMessage, active, result);
   }
 
@@ -46,7 +48,7 @@ public class Scrimmage extends Match implements Entity<Scrimmage> {
         objects.get(2).intValue(),
         new SQLEnum<>(MatchFormat.class).of(objects.get(3)),
         (LocalDateTime) objects.get(4),
-        objects.get(5).shortValue(),
+        SQLUtils.shortValue(objects.get(5)),
         new SQLEnum<>(EventStatus.class).of(objects.get(6)),
         (String) objects.get(7),
         (boolean) objects.get(8),
@@ -57,8 +59,9 @@ public class Scrimmage extends Match implements Entity<Scrimmage> {
   @Override
   public Scrimmage create() {
     final Scrimmage match = new Query<>(Scrimmage.class)
-        .col("matchday", playdayId).col("coverage_format", format).col("coverage_start", start).col("rate_offset", rateOffset)
-        .col("status", status).col("last_message", lastMessage).col("active", active).col("result", result)
+        .col("matchday", playdayId).col("coverage_format", format).col("coverage_start", start)
+        .col("rate_offset", rateOffset).col("status", status).col("last_message", lastMessage)
+        .col("active", active).col("result", result)
         .insert(this);
     new MatchLog(this, MatchLogAction.CREATE, "Spiel erstellt", null).create();
 

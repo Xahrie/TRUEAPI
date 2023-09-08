@@ -27,18 +27,22 @@ public class OrgaMatch extends LeagueMatch implements Entity<OrgaMatch> {
   @Serial private static final long serialVersionUID = 7299977559907217544L;
 
   public OrgaMatch(Playday matchday, LocalDateTime start, League league, SchedulingRange schedulingRange, int matchId) {
-    this(matchday, MatchFormat.TWO_GAMES, start, (short) 0, EventStatus.CREATED, "keine Infos", true, "-:-", league, league.getMatches().size() + 1, matchId, schedulingRange);
+    this(matchday, MatchFormat.TWO_GAMES, start, (short) 0, EventStatus.CREATED, "keine Infos", true,
+        "-:-", league, league.getMatches().size() + 1, matchId, schedulingRange);
   }
 
-  public OrgaMatch(@Nullable Playday playday, @NotNull MatchFormat format, @NotNull LocalDateTime start, Short rateOffset,
-                   @NotNull EventStatus status, @NotNull String lastMessage, boolean active, @NotNull String result, @NotNull League league,
-                   int matchIndex, int matchId, @NotNull TimeRange timeRange) {
+  public OrgaMatch(@Nullable Playday playday, @NotNull MatchFormat format, @NotNull LocalDateTime start,
+                   @Nullable Short rateOffset, @NotNull EventStatus status, @NotNull String lastMessage,
+                   boolean active, @NotNull String result, @NotNull League league, int matchIndex,
+                   int matchId, @NotNull TimeRange timeRange) {
     super(playday, format, start, rateOffset, status, lastMessage, active, result, league, matchIndex, matchId, timeRange);
   }
 
-  private OrgaMatch(int id, Integer playdayId, MatchFormat format, LocalDateTime start, short rateOffset, EventStatus status,
-                    String lastMessage, boolean active, String result, int leagueId, int matchIndex, int matchId, TimeRange timeRange) {
-    super(id, playdayId, format, start, rateOffset, status, lastMessage, active, result, leagueId, matchIndex, matchId, timeRange);
+  private OrgaMatch(int id, Integer playdayId, MatchFormat format, LocalDateTime start, Short rateOffset,
+                    EventStatus status, String lastMessage, boolean active, String result, int leagueId,
+                    int matchIndex, int matchId, TimeRange timeRange) {
+    super(id, playdayId, format, start, rateOffset, status, lastMessage, active, result, leagueId, matchIndex,
+        matchId, timeRange);
   }
 
   public static OrgaMatch get(List<Object> objects) {
@@ -47,7 +51,7 @@ public class OrgaMatch extends LeagueMatch implements Entity<OrgaMatch> {
         objects.get(2).intValue(),
         new SQLEnum<>(MatchFormat.class).of(objects.get(3)),
         (LocalDateTime) objects.get(4),
-        objects.get(5).shortValue(),
+        SQLUtils.shortValue(objects.get(5)),
         new SQLEnum<>(EventStatus.class).of(objects.get(6)),
         (String) objects.get(7),
         (boolean) objects.get(8),

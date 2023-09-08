@@ -91,8 +91,9 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
     return new MatchCalendar(getExpectedTimeRange(), String.valueOf(id));
   }
 
-  public Match(@Nullable Playday playday, @NotNull MatchFormat format, @NotNull LocalDateTime start, Short rateOffset,
-               @NotNull EventStatus status, String lastMessage, boolean active, @NotNull String result) {
+  public Match(@Nullable Playday playday, @NotNull MatchFormat format, @NotNull LocalDateTime start,
+               @Nullable Short rateOffset, @NotNull EventStatus status, String lastMessage, boolean active,
+               @NotNull String result) {
     this.playday = playday;
     this.playdayId = Util.avoidNull(playday, Playday::getId);
     this.format = format;
@@ -104,8 +105,8 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
     this.result = result;
   }
 
-  protected Match(int id, Integer playdayId, MatchFormat format, LocalDateTime start, Short rateOffset, EventStatus status,
-                  String lastMessage, boolean active, String result) {
+  protected Match(int id, Integer playdayId, MatchFormat format, LocalDateTime start, Short rateOffset,
+                  EventStatus status, String lastMessage, boolean active, String result) {
     this.id = id;
     this.playdayId = playdayId;
     this.format = format;
