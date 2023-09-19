@@ -12,6 +12,7 @@ import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.datatypes.calendar.DateTimeUtils;
 import de.xahrie.trues.api.discord.channel.DiscordChannel;
 import de.xahrie.trues.api.discord.user.DiscordUser;
+import de.xahrie.trues.api.discord.util.DefinedTextChannel;
 import de.xahrie.trues.api.discord.util.Jinx;
 import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
@@ -121,9 +122,12 @@ public class DiscordMessage implements Entity<DiscordMessage> {
 
   @Override
   public DiscordMessage create() {
-    return new Query<>(DiscordMessage.class).key("discord_id", messageId)
+    if (getDiscordChannel().getDiscordId() == DefinedTextChannel.DEV_LOG.getId()) return null;
+
+    return new Query<>(DiscordMessage.class)
         .col("discord_channel", discordChannelId)
-        .col("discord_message", discordUserId)
+        .col("discord_message", messageId)
+        .col("discord_user", discordUserId)
         .col("content", content)
         .col("content_length", length)
         .col("scheduled", scheduled)
@@ -134,7 +138,11 @@ public class DiscordMessage implements Entity<DiscordMessage> {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof final DiscordMessage that)) return false;
-    return getMessageId() == that.getMessageId();
+    if (messageId != null)
+      return Objects.equals(getMessageId(), that.getMessageId());
+
+    return getDiscordChannelId().equals(that.getDiscordChannelId())
+        && Objects.equals(getContent(), that.getContent());
   }
 
   @Override
@@ -146,12 +154,10 @@ public class DiscordMessage implements Entity<DiscordMessage> {
     if (scheduled != null && LocalDateTime.now().isAfterEqual(scheduled)) {
       resetScheduled();
       final TextChannel channel = Jinx.instance.getGuild().getTextChannelById(messageId);
-      if (channel == null) {
+      if (channel == null)
         getDiscordUser().dm("Der hinterlegte Channel wurde inzwischen gelöscht!");
-        resetContent();
-        return;
-      }
-      channel.sendMessage(content).queue(message -> setMessageId(message.getIdLong()));
+      else
+        channel.sendMessage(content).queue(message -> setMessageId(message.getIdLong()));
       resetContent();
     }
   }

@@ -1,5 +1,15 @@
 package de.xahrie.trues.api.discord.user;
 
+import java.io.Serial;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import de.xahrie.trues.api.calendar.ApplicationCalendar;
 import de.xahrie.trues.api.calendar.scheduling.SchedulingHandler;
 import de.xahrie.trues.api.community.application.ApplicationHandler;
 import de.xahrie.trues.api.community.application.TeamRole;
@@ -7,7 +17,6 @@ import de.xahrie.trues.api.community.betting.Bet;
 import de.xahrie.trues.api.community.betting.BetFactory;
 import de.xahrie.trues.api.community.betting.BetStatus;
 import de.xahrie.trues.api.community.member.Membership;
-import de.xahrie.trues.api.coverage.ABetable;
 import de.xahrie.trues.api.coverage.match.model.Match;
 import de.xahrie.trues.api.coverage.player.model.Player;
 import de.xahrie.trues.api.database.connector.SQLUtils;
@@ -20,24 +29,14 @@ import de.xahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.xahrie.trues.api.datatypes.calendar.TimeRange;
 import de.xahrie.trues.api.discord.group.DiscordGroup;
 import de.xahrie.trues.api.discord.group.RoleGranter;
-import de.xahrie.trues.api.discord.util.DefinedTextChannel;
-import de.xahrie.trues.api.calendar.ApplicationCalendar;
 import de.xahrie.trues.api.discord.notify.NotificationManager;
+import de.xahrie.trues.api.discord.util.DefinedTextChannel;
 import de.xahrie.trues.api.discord.util.Jinx;
 import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.entities.Member;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.Serial;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @Getter
