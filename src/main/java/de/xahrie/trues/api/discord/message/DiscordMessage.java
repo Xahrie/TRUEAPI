@@ -122,7 +122,8 @@ public class DiscordMessage implements Entity<DiscordMessage> {
 
   @Override
   public DiscordMessage create() {
-    if (getDiscordChannel().getDiscordId() == DefinedTextChannel.DEV_LOG.getId()) return null;
+    final DiscordChannel channel = getDiscordChannel();
+    if (channel != null && channel.getDiscordId() == DefinedTextChannel.DEV_LOG.getId()) return null;
 
     return new Query<>(DiscordMessage.class)
         .col("discord_channel", discordChannelId)
