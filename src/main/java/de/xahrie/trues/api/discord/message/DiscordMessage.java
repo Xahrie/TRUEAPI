@@ -10,7 +10,9 @@ import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Entity;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.datatypes.calendar.DateTimeUtils;
+import de.xahrie.trues.api.discord.channel.AbstractDiscordChannel;
 import de.xahrie.trues.api.discord.channel.DiscordChannel;
+import de.xahrie.trues.api.discord.channel.DiscordChannelFactory;
 import de.xahrie.trues.api.discord.user.DiscordUser;
 import de.xahrie.trues.api.discord.util.DefinedTextChannel;
 import de.xahrie.trues.api.discord.util.Jinx;
@@ -36,10 +38,10 @@ public class DiscordMessage implements Entity<DiscordMessage> {
   private final int length; // content_length
   private LocalDateTime scheduled; // scheduled
 
-  private DiscordChannel discordChannel;
+  private AbstractDiscordChannel discordChannel;
   private DiscordUser discordUser;
 
-  public DiscordChannel getDiscordChannel() {
+  public AbstractDiscordChannel getDiscordChannel() {
     if (discordChannel == null) this.discordChannel = new Query<>(DiscordChannel.class).entity(discordChannelId);
     return discordChannel;
   }
@@ -66,7 +68,8 @@ public class DiscordMessage implements Entity<DiscordMessage> {
 
   public DiscordMessage(long channelId, @Nullable Long messageId, @NotNull DiscordUser discordUser, @NotNull String content,
                         @Nullable LocalDateTime scheduled) {
-    this.discordChannelId = new Query<>(DiscordChannel.class).where("discord_id", channelId).id();
+    this.discordChannel = DiscordChannelFactory.getDiscordChannel(Jinx.instance.getChannels().getChannel(channelId));
+    this.discordChannelId = discordChannel.getId();
     this.messageId = messageId;
     this.discordUser = discordUser;
     this.discordUserId = discordUser.getId();
@@ -122,7 +125,7 @@ public class DiscordMessage implements Entity<DiscordMessage> {
 
   @Override
   public DiscordMessage create() {
-    final DiscordChannel channel = getDiscordChannel();
+    final AbstractDiscordChannel channel = getDiscordChannel();
     if (channel != null && channel.getDiscordId() == DefinedTextChannel.DEV_LOG.getId()) return null;
 
     return new Query<>(DiscordMessage.class)
