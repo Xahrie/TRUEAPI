@@ -54,7 +54,7 @@ public class DiscordMessage implements Entity<DiscordMessage> {
   @Nullable
   public String getContent() {
     if (content == null) {
-      final TextChannel channel = Jinx.instance.getGuild().getTextChannelById(messageId);
+      final TextChannel channel = Jinx.instance.getGuild().getTextChannelById(getDiscordChannel().getDiscordId());
       if (channel == null) return null;
       final Message message = channel.retrieveMessageById(messageId).complete();
       return message.getContentRaw();
@@ -144,7 +144,6 @@ public class DiscordMessage implements Entity<DiscordMessage> {
     if (!(o instanceof final DiscordMessage that)) return false;
     if (messageId != null)
       return Objects.equals(getMessageId(), that.getMessageId());
-
     return getDiscordChannelId().equals(that.getDiscordChannelId())
         && Objects.equals(getContent(), that.getContent());
   }
