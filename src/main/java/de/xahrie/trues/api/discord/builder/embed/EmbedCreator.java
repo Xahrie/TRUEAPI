@@ -3,15 +3,16 @@ package de.xahrie.trues.api.discord.builder.embed;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import de.xahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.xahrie.trues.api.datatypes.collections.SortedList;
 import de.xahrie.trues.api.discord.builder.queryCustomizer.Enumeration;
-import de.xahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.xahrie.trues.api.util.StringUtils;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import org.jetbrains.annotations.NotNull;
 
 @ExtensionMethod(StringUtils.class)
 public class EmbedCreator extends AbstractSimpleEmbedCreator {
@@ -31,13 +32,7 @@ public class EmbedCreator extends AbstractSimpleEmbedCreator {
     for (int i = 0; i < data.size(); i++) i += addField(i) - 1;
     embeds.add(currentEmbed);
 
-    List<MessageEmbed> list = SortedList.of();
-    for (EmbedBuilder embed : embeds) {
-      final MessageEmbed build = embed.build();
-      if (build != null)
-        list.add(build);
-    }
-    return list;
+    return SortedList.of(embeds.stream().filter(Objects::nonNull).map(EmbedBuilder::build));
   }
 
   private int addField(int index) {
@@ -120,7 +115,7 @@ public class EmbedCreator extends AbstractSimpleEmbedCreator {
   /**
    * Füge alle wartenden Spalten der Einbettung hinzu
    */
-  private void addAllWaitingColumns(List<EmbedColumn> columns) {
+  private void addAllWaitingColumns(@NotNull List<EmbedColumn> columns) {
     for (EmbedColumn column : columns) {
       final String name = column.name().keep(MessageEmbed.TITLE_MAX_LENGTH);
       this.currentEmbed.addField(name, column.value(), column.inline());
