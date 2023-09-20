@@ -115,7 +115,7 @@ public class DiscordMessage implements Entity<DiscordMessage> {
     return new DiscordMessage(
         (int) objects.get(0),
         (int) objects.get(1),
-        (long) objects.get(2),
+        objects.get(2).longValue(),
         objects.get(3).intValue(),
         (String) objects.get(4),
         objects.get(5).intValue(),

@@ -15,4 +15,9 @@ public final class SQLUtils {
     if (object == null) return null;
     return ((Number) object).intValue();
   }
+
+  public static Long longValue(Object object) {
+    if (object == null) return null;
+    return ((Number) object).longValue();
+  }
 }
