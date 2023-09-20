@@ -96,7 +96,7 @@ public class DiscordMessage implements Entity<DiscordMessage> {
 
   private void setMessageId(long messageId) {
     this.messageId = messageId;
-    new Query<>(DiscordMessage.class).col("discord_id", messageId).update(id);
+    new Query<>(DiscordMessage.class).col("discord_message", messageId).update(id);
   }
 
   private void resetScheduled() {

@@ -48,7 +48,6 @@ public abstract class LoadupManager implements Connectable {
     Logger.getAnonymousLogger().addHandler(consoleHandler);
     register();
     Jinx.instance.connect();
-    DataCall.setDefaultMaxSleep(15000);
     Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
       e.printStackTrace();
       new DevInfo().warn(e);
