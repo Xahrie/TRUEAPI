@@ -157,7 +157,7 @@ public class DiscordMessage implements Entity<DiscordMessage> {
   public void send() {
     if (scheduled != null && LocalDateTime.now().isAfterEqual(scheduled)) {
       resetScheduled();
-      final TextChannel channel = Jinx.instance.getGuild().getTextChannelById(messageId);
+      final TextChannel channel = Jinx.instance.getGuild().getTextChannelById(getDiscordChannel().getDiscordId());
       if (channel == null)
         getDiscordUser().dm("Der hinterlegte Channel wurde inzwischen gelöscht!");
       else

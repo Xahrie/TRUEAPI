@@ -16,6 +16,7 @@ import de.xahrie.trues.api.util.Const;
 import de.xahrie.trues.api.util.io.log.DevInfo;
 import lombok.extern.java.Log;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import no.stelar7.api.r4j.basic.calling.DataCall;
 
 import java.util.TimeZone;
 import java.util.logging.ConsoleHandler;
@@ -47,6 +48,7 @@ public abstract class LoadupManager implements Connectable {
     Logger.getAnonymousLogger().addHandler(consoleHandler);
     register();
     Jinx.instance.connect();
+    DataCall.setDefaultMaxSleep(15000);
     Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
       e.printStackTrace();
       new DevInfo().warn(e);
