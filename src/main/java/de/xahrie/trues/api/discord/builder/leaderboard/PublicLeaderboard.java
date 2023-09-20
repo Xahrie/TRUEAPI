@@ -85,7 +85,8 @@ public class PublicLeaderboard extends Leaderboard {
     final List<MessageEmbed> wrapperEmbeds = data.getEmbeds();
     final List<String> merge = data.merge();
     if (merge.isEmpty() || merge.get(0).isBlank()) {
-      getChannel().retrieveMessageById(messageIds.get(0)).queue(message -> message.editMessageEmbeds(wrapperEmbeds).queue());
+      if (!wrapperEmbeds.isEmpty())
+        getChannel().retrieveMessageById(messageIds.get(0)).queue(message -> message.editMessageEmbeds(wrapperEmbeds).queue());
       return;
     }
     for (int i = 0; i < merge.size(); i++) {
