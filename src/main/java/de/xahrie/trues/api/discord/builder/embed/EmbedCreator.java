@@ -4,11 +4,13 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.xahrie.trues.api.datatypes.collections.SortedList;
 import de.xahrie.trues.api.discord.builder.queryCustomizer.Enumeration;
 import de.xahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.xahrie.trues.api.util.StringUtils;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 @ExtensionMethod(StringUtils.class)
@@ -29,7 +31,13 @@ public class EmbedCreator extends AbstractSimpleEmbedCreator {
     for (int i = 0; i < data.size(); i++) i += addField(i) - 1;
     embeds.add(currentEmbed);
 
-    return embeds.stream().map(EmbedBuilder::build).toList();
+    List<MessageEmbed> list = SortedList.of();
+    for (EmbedBuilder embed : embeds) {
+      final MessageEmbed build = embed.build();
+      if (build != null)
+        list.add(build);
+    }
+    return list;
   }
 
   private int addField(int index) {
