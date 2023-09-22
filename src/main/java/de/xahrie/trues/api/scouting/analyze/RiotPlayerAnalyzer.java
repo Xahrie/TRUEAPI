@@ -22,6 +22,7 @@ import de.xahrie.trues.api.riot.match.MatchHistoryBuilder;
 import de.xahrie.trues.api.riot.match.RiotMatchAnalyzer;
 import de.xahrie.trues.api.riot.performance.Performance;
 import de.xahrie.trues.api.scouting.AnalyzeManager;
+import de.xahrie.trues.api.util.APIException;
 import de.xahrie.trues.api.util.Util;
 import no.stelar7.api.r4j.basic.constants.api.regions.LeagueShard;
 import no.stelar7.api.r4j.basic.constants.api.regions.RegionShard;
@@ -69,25 +70,27 @@ public record RiotPlayerAnalyzer(Player player, List<Performance> playedPerforma
     }
 
     final var historyBuilder = gameType.getMatchHistory(summoner, player);
-    if (analyzeGames(historyBuilder, gameType)) {
-      final PlayerRank old = player.getRanks().getCurrent();
-      final PlayerRank rank = new PlayerHandler(null, player).updateElo();
-      handleNotifier(old.getRank(), rank);
-    } else player.getRanks().createRank();
-
-    AnalyzeManager.delete(player);
-
-    if (gameType.equals(LoaderGameType.MATCHMADE)) player.setUpdated(currentTime);
-
+    try {
+      if (analyzeGames(historyBuilder, gameType)) {
+        final PlayerRank old = player.getRanks().getCurrent();
+        final PlayerRank rank = new PlayerHandler(null, player).updateElo();
+        handleNotifier(old.getRank(), rank);
+      } else player.getRanks().createRank();
+      AnalyzeManager.delete(player);
+      if (gameType.equals(LoaderGameType.MATCHMADE)) player.setUpdated(currentTime);
+    } catch (APIException exception) {
+      exception.printStackTrace();
+    }
     currentPlayers.remove(Integer.valueOf(player.getId()));
     Database.connection().commit(null);
   }
 
-  private boolean analyzeGames(List<String> history, LoaderGameType gameType) {
+  private boolean analyzeGames(List<String> history, LoaderGameType gameType) throws APIException {
     final long start = System.currentTimeMillis();
     boolean hasPlayedRanked = false;
     for (String matchId : new HashSet<>(history)) {
       final LOLMatch match = Zeri.get().getMatchAPI().getMatch(RegionShard.EUROPE, matchId);
+      if (match == null) throw new APIException("ERROR beim laden des Matches " + matchId);
       if (match.getParticipants().size() != 10) continue;
       if (!match.getMap().equals(MapType.SUMMONERS_RIFT)) continue;
       if (List.of(GameQueueType.BOT_5X5_INTRO, GameQueueType.BOT_5X5_BEGINNER,
