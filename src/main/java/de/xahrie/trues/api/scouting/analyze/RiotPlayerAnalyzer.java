@@ -70,27 +70,26 @@ public record RiotPlayerAnalyzer(Player player, List<Performance> playedPerforma
     }
 
     final var historyBuilder = gameType.getMatchHistory(summoner, player);
-    try {
-      if (analyzeGames(historyBuilder, gameType)) {
-        final PlayerRank old = player.getRanks().getCurrent();
-        final PlayerRank rank = new PlayerHandler(null, player).updateElo();
-        handleNotifier(old.getRank(), rank);
-      } else player.getRanks().createRank();
-      AnalyzeManager.delete(player);
-      if (gameType.equals(LoaderGameType.MATCHMADE)) player.setUpdated(currentTime);
-    } catch (APIException exception) {
-      exception.printStackTrace();
-    }
+    if (analyzeGames(historyBuilder, gameType)) {
+      final PlayerRank old = player.getRanks().getCurrent();
+      final PlayerRank rank = new PlayerHandler(null, player).updateElo();
+      handleNotifier(old.getRank(), rank);
+    } else player.getRanks().createRank();
+    AnalyzeManager.delete(player);
+    if (gameType.equals(LoaderGameType.MATCHMADE)) player.setUpdated(currentTime);
     currentPlayers.remove(Integer.valueOf(player.getId()));
     Database.connection().commit(null);
   }
 
-  private boolean analyzeGames(List<String> history, LoaderGameType gameType) throws APIException {
+  private boolean analyzeGames(List<String> history, LoaderGameType gameType) {
     final long start = System.currentTimeMillis();
     boolean hasPlayedRanked = false;
     for (String matchId : new HashSet<>(history)) {
       final LOLMatch match = Zeri.get().getMatchAPI().getMatch(RegionShard.EUROPE, matchId);
-      if (match == null) throw new APIException("ERROR beim laden des Matches " + matchId);
+      if (match == null) {
+        System.err.println("ERROR beim laden des Matches " + matchId);
+        continue;
+      }
       if (match.getParticipants().size() != 10) continue;
       if (!match.getMap().equals(MapType.SUMMONERS_RIFT)) continue;
       if (List.of(GameQueueType.BOT_5X5_INTRO, GameQueueType.BOT_5X5_BEGINNER,
