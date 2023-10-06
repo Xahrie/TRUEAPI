@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -90,9 +91,8 @@ public class PublicLeaderboard extends Leaderboard {
       return;
     }
     for (int i = 0; i < merge.size(); i++) {
-      if (messageIds.size() < merge.size()) {
+      if (messageIds.size() < merge.size())
         delete().createNewPublic();
-      }
 
       final String content = merge.get(i);
       if (i + 1 == merge.size() && !wrapperEmbeds.isEmpty())
@@ -106,8 +106,12 @@ public class PublicLeaderboard extends Leaderboard {
   }
 
   PublicLeaderboard delete() {
-    getMessageIds().forEach(msgId -> getChannel().retrieveMessageById(msgId).complete().delete().queue());
-    messageIds.clear();
+    try {
+      getMessageIds().forEach(msgId -> getChannel().retrieveMessageById(msgId).complete().delete().queue());
+      messageIds.clear();
+    } catch (ErrorResponseException exception) {
+      System.out.println(String.join(",", getMessageIds().stream().map(String::valueOf).toList()));
+    }
     return this;
   }
 

@@ -177,16 +177,12 @@ public abstract class Match implements AMatch, Comparable<Match>, Id {
       final MatchResult guessedResult = MatchResult.fromResultString(outcome, null);
       assert guessedResult != null;
       final int guessed = guessedResult.getHomeScore() - guessedResult.getGuestScore();
-      if ((real <= 0 || guessed <= 0) && (real >= 0 || guessed >= 0) && (real != 0 || guessed != 0)) {
+      if ((real <= 0 || guessed <= 0) && (real >= 0 || guessed >= 0) && (real != 0 || guessed != 0))
         return;
-      }
-      int amount = format.ordinal() + 1;
-      if (result.equals(outcome))
-        amount += switch (format) {
-          case BEST_OF_THREE -> 2;
-          case BEST_OF_FIVE -> 5;
-          default -> 0;
-        };
+
+      int amount = format.ordinal() > 3 ? format.ordinal() : format.ordinal() + 1;
+      if (result.equals(outcome) && format.ordinal() > 2)
+        amount += 2;
       bet.setDifference(amount);
       bet.getUser().dm("Du hast für deinen Tipp %d Punkte erhalten".formatted(amount));
       final List<Object[]> list = new Query<>(DiscordUser.class,
