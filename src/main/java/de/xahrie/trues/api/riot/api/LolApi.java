@@ -38,7 +38,7 @@ public class LolApi {
 
   public Summoner getSummonerByName(String summonerName) {
     if (summonerName == null) return null;
-    return api.getLoLAPI().getSummonerAPI().getSummonerByPUUID(LeagueShard.EUW1, summonerName);
+    return api.getLoLAPI().getSummonerAPI().getSummonerByName(LeagueShard.EUW1, summonerName);
   }
 
   public SortedList<ChampionMastery> getMastery(Player player) {
