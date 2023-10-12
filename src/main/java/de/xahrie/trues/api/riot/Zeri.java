@@ -1,6 +1,7 @@
 package de.xahrie.trues.api.riot;
 
 import com.merakianalytics.orianna.types.common.Region;
+import de.xahrie.trues.api.riot.api.LolApi;
 import de.xahrie.trues.api.riot.champion.ChampionFactory;
 import de.xahrie.trues.api.util.io.cfg.JSON;
 import lombok.EqualsAndHashCode;
@@ -16,9 +17,15 @@ public final class Zeri extends R4J {
   private static String currentKey;
   private static Zeri api;
 
+  @Deprecated
   public static LOLAPI get() {
     if (api == null) connect();
     return api.getLoLAPI();
+  }
+
+  public static LolApi lol() {
+    if (api == null) connect();
+    return new LolApi(api);
   }
 
   private Zeri(String key) {

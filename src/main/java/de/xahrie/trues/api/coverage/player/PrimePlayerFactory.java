@@ -8,7 +8,6 @@ import de.xahrie.trues.api.riot.Zeri;
 import de.xahrie.trues.api.util.Util;
 import lombok.NonNull;
 import lombok.experimental.ExtensionMethod;
-import no.stelar7.api.r4j.basic.constants.api.regions.LeagueShard;
 import no.stelar7.api.r4j.pojo.lol.summoner.Summoner;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,11 +28,12 @@ public final class PrimePlayerFactory {
   @Nullable
   public static PRMPlayer getPrimePlayer(int primeId, String summonerName) {
     PRMPlayer player = new Query<>(PRMPlayer.class).where("prm_id", primeId).entity();
-    if (summonerName == null) return player;
+    if (summonerName == null)
+      return player;
 
-    if (player != null) {
+    if (player != null)
       updatePrmAccount(player, summonerName);
-    } else {
+    else {
       player = createPlayer(summonerName, primeId);
       if (player != null) player.setPrmUserId(primeId);
     }
@@ -41,25 +41,27 @@ public final class PrimePlayerFactory {
   }
 
   private static void updatePrmAccount(@NonNull PRMPlayer player, @NonNull String summonerName) {
-    final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByName(LeagueShard.EUW1, summonerName);
+    final Summoner summoner = Zeri.lol().getSummonerByName(summonerName);
     final String puuid = summoner == null ? player.getPuuid() : summoner.getPUUID();
     final String summonerId = summoner == null ? player.getSummonerId() : summoner.getSummonerId();
     final String name = summoner == null ? player.getSummonerName() : summoner.getName();
 
     final Player p = new Query<>(Player.class).where("lol_puuid", puuid)
                                               .and(Condition.Comparer.NOT_EQUAL, "player_id", player.getId()).entity();
-    if (p != null) {
+    if (p != null)
       p.setPuuidAndName(null, null, null);
-    }
 
-    if (!player.getPuuid().equals(puuid) && puuid != null) {
-      player.setPuuidAndName(puuid, summonerId, name);
+    if (player.getPuuid() == null) {
+      if (puuid != null) player.setPuuidAndName(puuid, summonerId, name);
+      return;
     }
+    if (!player.getPuuid().equals(puuid) && puuid != null)
+      player.setPuuidAndName(puuid, summonerId, name);
   }
 
   @Nullable
   private static PRMPlayer createPlayer(String summonerName, int primeId) {
-    final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByName(LeagueShard.EUW1, summonerName);
+    final Summoner summoner = Zeri.lol().getSummonerByName(summonerName);
     if (summoner != null) {
       final String puuid = summoner.getPUUID();
       final String summonerId = summoner.getSummonerId();

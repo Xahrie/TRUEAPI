@@ -1,18 +1,17 @@
 package de.xahrie.trues.api.coverage.player;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import de.xahrie.trues.api.coverage.player.model.Player;
 import de.xahrie.trues.api.coverage.player.model.PlayerRank;
 import de.xahrie.trues.api.coverage.player.model.Rank;
 import de.xahrie.trues.api.riot.Zeri;
 import lombok.Builder;
 import lombok.Getter;
-import no.stelar7.api.r4j.basic.constants.api.regions.LeagueShard;
 import no.stelar7.api.r4j.basic.constants.types.lol.GameQueueType;
 import no.stelar7.api.r4j.pojo.lol.league.LeagueEntry;
 import no.stelar7.api.r4j.pojo.lol.summoner.Summoner;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 @Getter
 public class PlayerHandler extends PlayerModel implements Serializable {
@@ -25,12 +24,12 @@ public class PlayerHandler extends PlayerModel implements Serializable {
   }
 
   public void updateName() {
-    final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByPUUID(LeagueShard.EUW1, player.getPuuid());
+    final Summoner summoner = Zeri.lol().getSummonerByPlayer(player);
     if (summoner != null) player.setSummonerName(summoner.getName());
   }
 
   public PlayerRank updateElo() {
-    final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByPUUID(LeagueShard.EUW1, player.getPuuid());
+    final Summoner summoner = Zeri.lol().getSummonerByPlayer(player);
       LeagueEntry entry = null;
       for (LeagueEntry leagueEntry1 : summoner.getLeagueEntry()) {
         if (leagueEntry1.getQueueType().equals(GameQueueType.RANKED_SOLO_5X5)) {

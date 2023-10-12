@@ -81,7 +81,7 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
 
   public String getSummonerId() {
     if (summonerId == null) {
-      final String summonerId = Util.avoidNull(Zeri.get().getSummonerAPI().getSummonerByPUUID(LeagueShard.EUW1, puuid), Summoner::getSummonerId);
+      final String summonerId = Util.avoidNull(Zeri.lol().getSummonerByPlayer(this), Summoner::getSummonerId);
       if (summonerId != null) {
         this.summonerId = summonerId;
         new Query<>(Player.class).col("lol_summoner", summonerId).update(id);

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.xahrie.trues.api.riot.Zeri;
-import no.stelar7.api.r4j.basic.constants.api.regions.RegionShard;
 import no.stelar7.api.r4j.basic.constants.types.lol.GameQueueType;
 import no.stelar7.api.r4j.basic.constants.types.lol.MatchlistMatchType;
 import no.stelar7.api.r4j.pojo.lol.summoner.Summoner;
@@ -35,7 +34,7 @@ public record MatchHistoryBuilder(Summoner summoner, LocalDateTime start, List<S
     final Long startEpoch = start == null ? null : start.atZone(ZoneId.systemDefault()).toEpochSecond();
     int start = 0;
     while (true) {
-      final List<String> matchList = Zeri.get().getMatchAPI().getMatchList(RegionShard.EUROPE, summoner.getPUUID(), queueType, matchType, start, 100, startEpoch, LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond());
+      final List<String> matchList = Zeri.lol().getMatchIds(summoner, queueType, matchType, start, startEpoch);
       get.addAll(matchList);
       if (matchList.size() < 100) break;
       start += 100;

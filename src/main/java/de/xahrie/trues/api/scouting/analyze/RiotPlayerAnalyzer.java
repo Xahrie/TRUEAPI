@@ -22,10 +22,7 @@ import de.xahrie.trues.api.riot.match.MatchHistoryBuilder;
 import de.xahrie.trues.api.riot.match.RiotMatchAnalyzer;
 import de.xahrie.trues.api.riot.performance.Performance;
 import de.xahrie.trues.api.scouting.AnalyzeManager;
-import de.xahrie.trues.api.util.APIException;
 import de.xahrie.trues.api.util.Util;
-import no.stelar7.api.r4j.basic.constants.api.regions.LeagueShard;
-import no.stelar7.api.r4j.basic.constants.api.regions.RegionShard;
 import no.stelar7.api.r4j.basic.constants.types.lol.GameQueueType;
 import no.stelar7.api.r4j.basic.constants.types.lol.MapType;
 import no.stelar7.api.r4j.pojo.lol.match.v5.LOLMatch;
@@ -51,12 +48,12 @@ public record RiotPlayerAnalyzer(Player player, List<Performance> playedPerforma
     if (gameType.equals(LoaderGameType.MATCHMADE) &&
         fullyAnalyzedPlayers.contains(player.getId()) && !force) return;
 
-
     currentPlayers.add(player.getId());
     fullyAnalyzedPlayers.add(player.getId());
 
-    final Summoner summoner =
-        Zeri.get().getSummonerAPI().getSummonerByPUUID(LeagueShard.EUW1, player.getPuuid());
+    final Summoner summoner = Zeri.lol().getSummonerByPlayer(player);
+    if (summoner == null) return;
+
     player.setSummonerName(summoner.getName());
     final LocalDateTime currentTime = LocalDateTime.now();
 
@@ -85,7 +82,7 @@ public record RiotPlayerAnalyzer(Player player, List<Performance> playedPerforma
     final long start = System.currentTimeMillis();
     boolean hasPlayedRanked = false;
     for (String matchId : new HashSet<>(history)) {
-      final LOLMatch match = Zeri.get().getMatchAPI().getMatch(RegionShard.EUROPE, matchId);
+      final LOLMatch match = Zeri.lol().getMatch(matchId);
       if (match == null) {
         System.err.println("ERROR beim laden des Matches " + matchId);
         continue;
@@ -126,11 +123,7 @@ public record RiotPlayerAnalyzer(Player player, List<Performance> playedPerforma
 
   public void analyzeMastery() {
     todayAnalyzedPlayers.add(player.getId());
-    final Summoner summonerByPUUID =
-        Zeri.get().getSummonerAPI().getSummonerByPUUID(LeagueShard.EUW1, player.getPuuid());
-    final String summonerId = summonerByPUUID.getSummonerId();
-    for (no.stelar7.api.r4j.pojo.lol.championmastery.ChampionMastery championMastery :
-        Zeri.get().getMasteryAPI().getChampionMasteries(LeagueShard.EUW1, summonerId)) {
+    for (no.stelar7.api.r4j.pojo.lol.championmastery.ChampionMastery championMastery : Zeri.lol().getMastery(player)) {
       new ChampionMastery(player, championMastery.getChampionId(),
           championMastery.getChampionPoints(),
           (byte) championMastery.getChampionLevel(),

@@ -29,7 +29,7 @@ public final class PlayerFactory {
   public static Player getPlayerFromPuuid(String puuid) {
     Player player = findPlayer(puuid);
     if (player == null) {
-      final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByPUUID(LeagueShard.EUW1, puuid);
+      final Summoner summoner = Zeri.lol().getSummonerByPuuid(puuid);
       if (summoner != null) player = new PlayerImpl(summoner.getName(), summoner.getSummonerId(), puuid).create();
     }
     return player;
@@ -40,7 +40,7 @@ public final class PlayerFactory {
     final Player player = lookForPlayer(summonerName);
     if (player != null) return player;
 
-    final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByName(LeagueShard.EUW1, summonerName);
+    final Summoner summoner = Zeri.lol().getSummonerByName(summonerName);
     if (summoner == null) {
       new DevInfo("Der Spieler **" + summonerName + "** existiert nicht").with(Console.class).warn();
       return null;
@@ -53,7 +53,7 @@ public final class PlayerFactory {
     final Player player = determineExistingPlayerFromName(summonerName);
     if (player != null) return player;
 
-    final Summoner summoner = Zeri.get().getSummonerAPI().getSummonerByName(LeagueShard.EUW1, summonerName);
+    final Summoner summoner = Zeri.lol().getSummonerByName(summonerName);
     return summoner == null ? null : findPlayer(summoner.getPUUID());
   }
 

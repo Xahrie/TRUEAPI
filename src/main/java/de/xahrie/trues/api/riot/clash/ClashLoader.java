@@ -1,6 +1,5 @@
 package de.xahrie.trues.api.riot.clash;
 
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -8,7 +7,6 @@ import de.xahrie.trues.api.coverage.season.Season;
 import de.xahrie.trues.api.database.query.Condition;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.riot.Zeri;
-import no.stelar7.api.r4j.basic.constants.api.regions.LeagueShard;
 import no.stelar7.api.r4j.pojo.lol.clash.ClashTournament;
 import no.stelar7.api.r4j.pojo.lol.clash.ClashTournamentPhase;
 
@@ -16,7 +14,7 @@ public class ClashLoader {
   private static final Duration CLASH_DELAY = Duration.ofMinutes(45);
   private static final Duration CLASH_DURATION = Duration.ofMinutes(345);
   public static void loadAllClashes() {
-    for (ClashTournament tournament : Zeri.get().getClashAPI().getTournaments(LeagueShard.EUW1)) {
+    for (ClashTournament tournament : Zeri.lol().getTournaments()) {
       final String name =  tournament.getNameKey();
       for (ClashTournamentPhase phase : tournament.getSchedule()) {
         final LocalDateTime registration = phase.getRegistrationTimeAsDate().toLocalDateTime();
