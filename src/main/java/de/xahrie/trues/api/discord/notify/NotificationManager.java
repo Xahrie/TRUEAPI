@@ -34,7 +34,7 @@ public class NotificationManager {
                                     "LEFT JOIN orga_team ot on coverage_team.team = ot.team INNER JOIN coverage c on coverage_team.coverage = c.coverage_id " +
                                     "WHERE orga_team_id is not null and coverage_start between now() and ?")
         .entityList(List.of(localDateTime)).forEach(NotificationManager::addNotifiersFor);
-    new Query<>(Match.class, "SELECT * FROM coverage_team " +
+    new Query<>(Match.class, "SELECT c.* FROM coverage_team " +
         "INNER JOIN orga_team ot on coverage_team.team = ot.team " +
         "INNER JOIN coverage c on coverage_team.coverage = c.coverage_id " +
         "WHERE orga_team_id is not null and coverage_start between ? and ?")
