@@ -11,6 +11,7 @@ import de.xahrie.trues.api.database.query.Entity;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.database.query.SQLEnum;
 import de.xahrie.trues.api.riot.performance.Lane;
+import de.xahrie.trues.api.util.Util;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +40,7 @@ public class Lineup implements Entity<Lineup>, Comparable<Lineup> {
     this.participator = participator;
     this.participatorId = participator.getId();
     this.player = player;
-    this.playerId = player.getId();
+    this.playerId = Util.avoidNull(player, 0, Player::getId);
     this.lane = lane;
   }
 
