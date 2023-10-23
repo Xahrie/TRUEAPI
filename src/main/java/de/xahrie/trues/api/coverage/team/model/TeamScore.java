@@ -6,6 +6,8 @@ import java.util.Objects;
 
 import de.xahrie.trues.api.util.Format;
 import de.xahrie.trues.api.util.StringUtils;
+import de.xahrie.trues.api.util.Util;
+import de.xahrie.trues.api.util.io.request.URLType;
 import org.jetbrains.annotations.NotNull;
 
 public record TeamScore(Short place, Short wins, Short losses) implements Serializable, Comparable<TeamScore> {
@@ -27,6 +29,8 @@ public record TeamScore(Short place, Short wins, Short losses) implements Serial
   }
 
   public Standing getStanding() {
+    int wins = wins() == null ? 0 : (int) wins();
+    int losses = losses() == null ? 0 : (int) losses();
     return new Standing(wins, losses);
   }
 
