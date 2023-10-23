@@ -36,6 +36,11 @@ public class MatchHandler extends MatchModel implements Serializable {
   }
 
   public void update() {
+    if (this.html == null || this.html.text().isEmpty()) { // match might be hidden
+      match.setStatus(EventStatus.PLAYED);
+      return;
+    }
+
     updateResult();
     updateMatchtime();
     updateTeams();
