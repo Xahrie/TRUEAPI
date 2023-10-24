@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalTime;
+import java.util.Objects;
 
 @AllArgsConstructor
 @Getter
@@ -36,5 +37,18 @@ public abstract class Notifier {
     if (teamChannel != null && orgaTeam.equals(teamChannel.getOrgaTeam())) return;
 
     getDiscordUser().dm(output + ": " + timeRange.displayRange());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    final Notifier notifier = (Notifier) o;
+    return Objects.equals(localTime, notifier.localTime) && Objects.equals(discordUser, notifier.discordUser);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(localTime, discordUser);
   }
 }

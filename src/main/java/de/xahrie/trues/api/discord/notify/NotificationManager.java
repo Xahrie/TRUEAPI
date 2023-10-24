@@ -43,7 +43,8 @@ public class NotificationManager {
   }
 
   public static void addNotifiersFor(TeamCalendar calendar) {
-    final List<Notifier> existing = notifiers.stream().filter(notifier -> notifier instanceof TeamEventNotifier teamEventNotifier && teamEventNotifier.getTeamCalendar().equals(calendar)).toList();
+    final List<Notifier> existing =
+        notifiers.stream().filter(notifier -> notifier instanceof TeamEventNotifier teamEventNotifier && teamEventNotifier.getTeamCalendar().equals(calendar)).toList();
     notifiers.removeAll(existing);
     calendar.getOrgaTeam().getActiveMemberships().stream().map(Membership::getUser).filter(user -> user.getNotification() >= 0).forEach(user -> {
       notifiers.add(new TeamEventNotifier(calendar.getRange().getStartTime().toLocalTime(), user, calendar));
@@ -81,7 +82,10 @@ public class NotificationManager {
 
   public static void sendNotifications() {
     final List<Notifier> current = notifiers.stream().filter(notifier -> notifier.getLocalTime().isBeforeEqual(LocalTime.now())).toList();
-    current.forEach(Notifier::sendNotification);
+    current.forEach(notifier -> {
+      notifier.sendNotification();
+      notifiers.removeIf(nf -> nf.equals(notifier));
+    });
     notifiers.removeAll(current);
   }
 

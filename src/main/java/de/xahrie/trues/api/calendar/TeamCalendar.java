@@ -3,6 +3,7 @@ package de.xahrie.trues.api.calendar;
 import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import de.xahrie.trues.api.community.orgateam.OrgaTeam;
 import de.xahrie.trues.api.coverage.match.model.Match;
@@ -36,8 +37,7 @@ public class TeamCalendar extends AbstractEventCalendar implements Entity<TeamCa
 
   public TeamCalendar(@NotNull
   TimeRange timeRange, @NotNull String details, @NotNull TeamCalendarType type, @NotNull
-  OrgaTeam orgaTeam,
-                      long threadId) {
+  OrgaTeam orgaTeam, long threadId) {
     super(timeRange, details, threadId);
     this.type = type;
     this.orgaTeam = orgaTeam;
@@ -110,6 +110,19 @@ public class TeamCalendar extends AbstractEventCalendar implements Entity<TeamCa
   public OrgaTeam getOrgaTeam() {
     if (orgaTeam == null) this.orgaTeam = new Query<>(OrgaTeam.class).entity(orgaTeamId);
     return orgaTeam;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    final TeamCalendar that = (TeamCalendar) o;
+    return orgaTeamId == that.orgaTeamId && type == that.type;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(type, orgaTeamId, orgaTeam);
   }
 
   @ExtensionMethod(StringUtils.class)
