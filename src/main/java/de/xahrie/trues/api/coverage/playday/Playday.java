@@ -34,7 +34,7 @@ public class Playday implements Entity<Playday>, Comparable<Playday> {
   private Stage stage;
 
   public Stage getStage() {
-    if (stage == null) this.stage = new Query<>(Stage.class).entity(id);
+    if (stage == null) this.stage = new Query<>(Stage.class).entity(stageId);
     return stage;
   }
 

@@ -72,4 +72,11 @@ public record MatchManager(AbstractTeam team) {
         .where("team", team).and("_playday.stage", stage)
         .ascending("_match.coverage_start").convertList(Match.class);
   }
+
+  public List<Match> getMatchesOf(Playday playday) {
+    return new Query<>(Participator.class)
+        .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
+        .where("team", team).and("_coverage.matchday", playday)
+        .ascending("_match.coverage_start").convertList(Match.class);
+  }
 }

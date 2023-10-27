@@ -26,8 +26,7 @@ public final class UpcomingDataFactory {
   private final List<Match> nextMatches;
 
   private UpcomingDataFactory() {
-    this.nextMatches = new Query<>(Match.class).where(Condition.Comparer.SMALLER_EQUAL, "coverage_start", LocalDateTime.now().plusHours(3))
-                                               .and("result", "-:-").ascending("coverage_start").entityList();
+    this.nextMatches = getMatches(3);
   }
 
   public List<AbstractTeam> getTeams() {
@@ -37,5 +36,14 @@ public final class UpcomingDataFactory {
 
   public List<Match> getMatches() {
     return nextMatches;
+  }
+
+  public static List<Match> getMatches(int hours) {
+    if (hours == 3 && instance != null)
+      return getInstance().getMatches();
+
+    final LocalDateTime timestamp = LocalDateTime.now().plusHours(hours);
+    return new Query<>(Match.class).where(Condition.Comparer.SMALLER_EQUAL, "coverage_start", timestamp)
+        .and("result", "-:-").ascending("coverage_start").entityList();
   }
 }
