@@ -9,7 +9,7 @@ public class ChampionFactory {
   }
 
   public static Champion getChampion(@NotNull com.merakianalytics.orianna.types.core.staticdata.Champion riotChampion) {
-    return new Champion(riotChampion.getId(), riotChampion.getName()).create();
+    return new Champion(riotChampion.getId(), riotChampion.getName(), riotChampion.getKey()).create();
   }
 
   public static Champion getChampion(String name) {
