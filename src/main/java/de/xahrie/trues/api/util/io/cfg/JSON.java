@@ -43,8 +43,19 @@ public final class JSON extends JSONObject {
     if (Files.exists(Paths.get("./resources/"))) {
       return Paths.get("./resources/" + fileName);
     } else {
-      final URL resource = JSON.class.getResource("/" + fileName);
-      if (resource == null) throw new FileNotFoundException("File " + fileName + " konnte nicht gefunden werden.");
+      URL resource = JSON.class.getResource("/" + fileName);
+      if (resource == null) {
+        resource = JSON.class.getResource(fileName);
+        if (resource == null) {
+          resource = JSON.class.getClassLoader().getResource("/" + fileName);
+          if (resource == null) {
+            resource = JSON.class.getClassLoader().getResource(fileName);
+            if (resource == null) {
+              throw new FileNotFoundException("File " + fileName + " konnte nicht gefunden werden.");
+            }
+          }
+        }
+      }
       return Path.of(resource.toURI());
     }
   }
