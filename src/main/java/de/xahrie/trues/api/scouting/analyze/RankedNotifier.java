@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import de.xahrie.trues.api.coverage.player.model.Player;
 import de.xahrie.trues.api.coverage.player.model.PlayerRank;
@@ -36,10 +35,11 @@ public record RankedNotifier(Player player, List<Performance> playedPerformances
 
   void handleNotifier(@NotNull Rank oldRank, @NotNull PlayerRank playerRank) {
     final DiscordUser user = player.getDiscordUser();
-    final Rank newRank = playerRank.getRank();
-    int diff = newRank.getMMR() - oldRank.getMMR();
     if (user == null) return;
     if (!user.isNotifyRank()) return;
+    if (user.getMember() == null) return;
+    final Rank newRank = playerRank.getRank();
+    int diff = newRank.getMMR() - oldRank.getMMR();
 
     final Standing winrate = playerRank.getWinrate();
     final String description;
@@ -91,15 +91,24 @@ public record RankedNotifier(Player player, List<Performance> playedPerformances
     List<Player> playerList = SortedList.of(oldRanks.keySet().stream()
         .map(pId -> new Query<>(Player.class).entity(pId))
         .filter(player -> !player.getRanks().getCurrent().getRank().like(oldRanks.get(player.getId()))));
+    final List<PlayerRankChange> rankChanges = playerList.stream()
+        .map(player1 -> new PlayerRankChange(
+            player1, oldRanks.get(player.getId()), player.getRanks().getCurrent().getRank()
+        )).toList();
 
     if (!playerList.isEmpty()) {
       final EmbedBuilder builder = new EmbedBuilder().setTitle("Rankups")
           .setDescription("Rankups letzte 12 Stunden");
-      new EmbedFieldBuilder<>(playerList)
-          .add("Nutzer", player -> player.getDiscordUser().getMention())
-          .add("Alter Rang", player -> String.valueOf(oldRanks.getOrDefault(player.getId(), new Rank(Rank.RankTier.UNRANKED,
-              Rank.Division.I, (short) 0))))
-          .add("Neuer Rang", player -> String.valueOf(player.getRanks().getCurrent().getRank()))
+      new EmbedFieldBuilder<>(rankChanges.stream().filter(playerRankChange -> playerRankChange.isPromoted() == 1).toList())
+          .add("Promotions", change -> change.player().getDiscordUser().getMention())
+          .add("Alter Rang", change -> String.valueOf(change.oldRank()))
+          .add("Neuer Rang", change -> String.valueOf(change.newRank()))
+          .build().forEach(builder::addField);
+
+      new EmbedFieldBuilder<>(rankChanges.stream().filter(playerRankChange -> playerRankChange.isPromoted() == -1).toList())
+          .add("Demotions", change -> change.player().getDiscordUser().getMention())
+          .add("Alter Rang", change -> String.valueOf(change.oldRank()))
+          .add("Neuer Rang", change -> String.valueOf(change.newRank()))
           .build().forEach(builder::addField);
       Jinx.instance.getChannels().getTextChannel(DefinedTextChannel.RANKED)
           .sendMessageEmbeds(builder.build()).queue();
