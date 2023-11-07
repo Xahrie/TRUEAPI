@@ -46,7 +46,7 @@ public class Champion implements Entity<Champion> {
   }
 
   public String getIconUrl() {
-    return "http://ddragon.leagueoflegends.com/cdn/" + Xayah.getPatch().getName() + "/img/champion/" + index + ".png";
-
+    return "http://ddragon.leagueoflegends.com/cdn/%s.1/img/champion/%s.png"
+        .formatted(Xayah.getPatch().getName(), index);
   }
 }
