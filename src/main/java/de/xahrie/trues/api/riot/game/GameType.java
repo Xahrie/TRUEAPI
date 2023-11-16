@@ -25,7 +25,7 @@ public enum GameType {
       case RANKED_FLEX_SR -> RANKED_FLEX;
       case TEAM_BUILDER_RANKED_SOLO -> RANKED_SOLO;
       case TEAM_BUILDER_DRAFT_UNRANKED_5X5 -> NORMAL_DRAFT;
-      case NORMAL_5V5_BLIND_PICK -> NORMAL_BLIND;
+      case NORMAL_5V5_BLIND_PICK, QUICKPLAY_NORMAL -> NORMAL_BLIND;
       case CUSTOM -> throw new IllegalArgumentException("Wird woanders verarbeitet!");
       default -> throw new IllegalArgumentException("Keine Queue bekannt! " + queueType.name());
     };
