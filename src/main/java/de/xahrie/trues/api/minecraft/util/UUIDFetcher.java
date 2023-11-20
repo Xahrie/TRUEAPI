@@ -51,7 +51,7 @@ public class UUIDFetcher {
     if (uuidCache.containsKey(name)) return uuidCache.get(name);
 
     try {
-      final URL url = new URL("https://api.mojang.com/users/profiles/minecraft/%s" + name);
+      final URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);
       final UUIDFetcher fetcher = getUUIDFetcher(url);
       return Util.avoidNull(fetcher, UUIDFetcher::getId);
     } catch (MalformedURLException e) {
