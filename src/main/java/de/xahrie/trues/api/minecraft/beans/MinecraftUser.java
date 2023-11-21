@@ -15,6 +15,7 @@ import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 
 import java.io.Serial;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -32,15 +33,25 @@ public class MinecraftUser implements Entity<MinecraftUser> {
   private String name;
   private final int discordUserId;
   private int timePlayed;
+  private LocalDateTime lastOnline;
   private short deaths;
+  private boolean whitelisted;
+  private Integer teamId;
+  private LocalDateTime joined;
 
   private DiscordUser discordUser;
+  private MinecraftTeam minecraftTeam;
 
   public DiscordUser getDiscordUser() {
-    if (discordUser == null) {
+    if (discordUser == null)
       this.discordUser = new Query<>(DiscordUser.class).entity(discordUserId);
-    }
     return discordUser;
+  }
+
+  public MinecraftTeam getMinecraftTeam() {
+    if (minecraftTeam == null)
+      this.minecraftTeam = new Query<>(MinecraftTeam.class).entity(teamId);
+    return minecraftTeam;
   }
 
   public MinecraftUser(UUID uuid, String name, DiscordUser discordUser) {
@@ -50,33 +61,73 @@ public class MinecraftUser implements Entity<MinecraftUser> {
     this.discordUserId = discordUser.getId();
     this.deaths = 0;
     this.timePlayed = 0;
+    this.whitelisted = true;
+    this.teamId = null;
+    this.joined = null;
   }
 
-  private MinecraftUser(int id, UUID uuid, String name, int discordUserId, int timePlayed, short deaths) {
+  private MinecraftUser(int id, UUID uuid, String name, int discordUserId, int timePlayed, LocalDateTime lastOnline,
+                        short deaths, boolean whitelisted, Integer teamId, LocalDateTime joined) {
     this.id = id;
     this.uuid = uuid;
     this.name = name;
     this.discordUserId = discordUserId;
     this.timePlayed = timePlayed;
+    this.lastOnline = lastOnline;
     this.deaths = deaths;
+    this.whitelisted = whitelisted;
+    this.teamId = teamId;
+    this.joined = joined;
   }
 
   public static MinecraftUser get(List<Object> objects) {
     return new MinecraftUser(
-            (int) objects.get(0),
-            UUID.fromString((String) objects.get(1)),
-            (String) objects.get(2),
-            (int) objects.get(3),
-            (int) objects.get(4),
-            objects.get(5).shortValue()
+        (int) objects.get(0),
+        UUID.fromString((String) objects.get(1)),
+        (String) objects.get(2),
+        (int) objects.get(3),
+        (int) objects.get(4),
+        (LocalDateTime) objects.get(5),
+        (short) objects.get(6),
+        (boolean) objects.get(7),
+        SQLUtils.intValue(objects.get(8)),
+        (LocalDateTime) objects.get(9)
     );
   }
 
   @Override
   public MinecraftUser create() {
     return new Query<>(MinecraftUser.class).key("discord_user", discordUserId)
-            .col("mc_uuid", uuid).col("mc_name", name).col("time_played", timePlayed)
-            .col("deaths", deaths).insert(this);
+        .col("mc_uuid", uuid).col("mc_name", name).col("seconds_played", timePlayed)
+        .col("last_time_online", lastOnline).col("deaths", deaths).col("whitelisted", whitelisted)
+        .col("mc_team", teamId).col("team_joined", joined)
+        .insert(this);
+  }
+
+  public void join(MinecraftTeam minecraftTeam) {
+    if (minecraftTeam == null) {
+      this.minecraftTeam = null;
+      this.teamId = null;
+      this.joined = null;
+    } else if (minecraftTeam.getId() != this.minecraftTeam.getId()) {
+      this.minecraftTeam = null;
+      this.teamId = minecraftTeam.getId();
+      this.joined = LocalDateTime.now();
+    }
+
+    new Query<>(MinecraftUser.class).col("mc_team", teamId).col("team_joined", joined).update(id);
+  }
+
+  public void setLastOnline(LocalDateTime lastOnline) {
+    if (!Objects.equals(this.lastOnline, lastOnline))
+      new Query<>(MinecraftUser.class).col("last_time_online", lastOnline).update(id);
+    this.lastOnline = lastOnline;
+  }
+
+  public void setWhitelisted(boolean whitelisted) {
+    if (this.whitelisted != whitelisted)
+      new Query<>(MinecraftUser.class).col("whitelisted", whitelisted).update(id);
+    this.whitelisted = whitelisted;
   }
 
   public void addDeath() {
@@ -86,7 +137,7 @@ public class MinecraftUser implements Entity<MinecraftUser> {
 
   public void updateTimePlayed() {
     this.timePlayed = getPlayer().getStatistic(Statistic.PLAY_ONE_MINUTE) / (20 * 60);
-    new Query<>(MinecraftUser.class).col("time_played", timePlayed).update(id);
+    new Query<>(MinecraftUser.class).col("seconds_played", timePlayed).update(id);
   }
 
   public void updateName() {
