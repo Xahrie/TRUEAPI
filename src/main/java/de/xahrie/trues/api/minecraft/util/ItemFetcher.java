@@ -1,8 +1,13 @@
 package de.xahrie.trues.api.minecraft.util;
 
-import de.xahrie.trues.api.minecraft.beans.MinecraftUser;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import lombok.Builder;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
@@ -10,16 +15,14 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.List;
-import java.util.Map;
-
 @Builder
 public class ItemFetcher {
   private Material material;
   private String name;
-  private int amount;
+  private int amount = 1;
   private Short durability;
-  private MinecraftUser user;
+  private OfflinePlayer player;
+  private String playerName;
   private Map<Enchantment, Integer> enchantments;
   private List<String> description;
   private String title;
@@ -47,7 +50,11 @@ public class ItemFetcher {
     }
 
     if (material.equals(Material.SKELETON_SKULL) && itemMeta instanceof SkullMeta) {
-      ((SkullMeta) itemMeta).setOwningPlayer(user.getPlayer());
+      if (player == null  && playerName != null) {
+        UUID uuid = UUIDFetcher.getUUID(playerName);
+        player = Bukkit.getOfflinePlayer(uuid);
+      }
+      ((SkullMeta) itemMeta).setOwningPlayer(player);
     }
 
     if (durability != null) {

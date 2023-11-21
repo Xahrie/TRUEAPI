@@ -118,6 +118,10 @@ public class MinecraftUser implements Entity<MinecraftUser> {
     new Query<>(MinecraftUser.class).col("mc_team", teamId).col("team_joined", joined).update(id);
   }
 
+  public void leave() {
+    join(null);
+  }
+
   public void setLastOnline(LocalDateTime lastOnline) {
     if (!Objects.equals(this.lastOnline, lastOnline))
       new Query<>(MinecraftUser.class).col("last_time_online", lastOnline).update(id);
@@ -162,6 +166,12 @@ public class MinecraftUser implements Entity<MinecraftUser> {
       player.setPlayerListName(
               nameToDisplay + ChatColor.YELLOW + " " + player.getStatistic(Statistic.DEATHS));
     }
+  }
+
+  public void sendMessage(String message) {
+    final OfflinePlayer player = getPlayer();
+    if (player.isOnline())
+      ((Player) player).sendMessage(message);
   }
 
   public OfflinePlayer getPlayer() {

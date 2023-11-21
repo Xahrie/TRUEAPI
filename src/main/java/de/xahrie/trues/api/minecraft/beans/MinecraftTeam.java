@@ -13,7 +13,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by Lara on 23.11.2022 for MCProject
@@ -29,7 +31,7 @@ public final class MinecraftTeam implements Entity<MinecraftTeam> {
   private MinecraftColor color;
   private Integer centerX;
   private Integer centerY;
-  private final int creatorId;
+  private int creatorId;
 
   private MinecraftUser creator;
 
@@ -116,18 +118,22 @@ public final class MinecraftTeam implements Entity<MinecraftTeam> {
     this.password = password;
   }
 
-  public void setCenterX(Integer centerX) {
-    if (Objects.equals(this.centerX, centerX))
-      new Query<>(MinecraftTeam.class).col("center_x", centerX).update(id);
-    this.centerX = centerX;
-  }
+  public void setLocation(@NotNull Location location) {
+    setCenterX(location.getBlockX());
+    if (Objects.equals(this.centerX, location.getBlockX()))
+      new Query<>(MinecraftTeam.class).col("center_x", location.getBlockX()).update(id);
+    this.centerX = location.getBlockX();
 
-  public void setCenterY(Integer centerY) {
-    if (Objects.equals(this.centerY, centerY))
-      new Query<>(MinecraftTeam.class).col("center_y", centerY).update(id);
-    this.centerY = centerY;
+    if (Objects.equals(this.centerY, location.getBlockZ()))
+      new Query<>(MinecraftTeam.class).col("center_y", location.getBlockZ()).update(id);
+    this.centerY = location.getBlockZ();
   }
-
+  public void setCreator(@NonNull MinecraftUser creator) {
+    if (Objects.equals(this.creator, creator))
+      new Query<>(MinecraftTeam.class).col("creator", creator.getId()).update(id);
+    this.creator = creator;
+    this.creatorId = creator.getId();
+  }
 
   @NonNull
   public List<MinecraftUser> getMembers() {
