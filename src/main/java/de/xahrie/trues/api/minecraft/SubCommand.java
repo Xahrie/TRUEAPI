@@ -23,11 +23,15 @@ public abstract class SubCommand {
 
   public boolean error(Player player, String message) {
     player.sendMessage(ChatColor.RED + message);
-    return false;
+    return message(player, message, false);
   }
 
   public boolean message(Player player, String message) {
+    return message(player, message, true);
+  }
+
+  public boolean message(Player player, String message, boolean bool) {
     player.sendMessage(message);
-    return false;
+    return bool;
   }
 }
