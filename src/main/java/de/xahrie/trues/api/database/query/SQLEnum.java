@@ -39,7 +39,7 @@ public class SQLEnum<E extends Enum<E>> {
           case LOWER -> e.name().toLowerCase();
           case UPPER -> e.name().toUpperCase();
           case CAPITALIZE -> StringUtils.capitalizeEnum(e.name().toLowerCase());
-          case ORDINAL -> e.ordinal();
+          case ORDINAL -> "" + e.ordinal();
         }).equals(source))
         .findFirst().orElseThrow(() -> new IllegalArgumentException("Der Wert kann nicht vergeben werden. (" + value + ")"));
   }
