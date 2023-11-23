@@ -5,10 +5,11 @@ import de.xahrie.trues.api.coverage.player.model.Player;
 import de.xahrie.trues.api.database.query.Condition;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.riot.Zeri;
+import de.xahrie.trues.api.riot.api.RiotName;
+import de.xahrie.trues.api.riot.api.RiotUser;
 import de.xahrie.trues.api.util.Util;
 import lombok.NonNull;
 import lombok.experimental.ExtensionMethod;
-import no.stelar7.api.r4j.pojo.lol.summoner.Summoner;
 import org.jetbrains.annotations.Nullable;
 
 @ExtensionMethod(Util.class)
@@ -26,31 +27,31 @@ public final class PrimePlayerFactory {
 
 
   @Nullable
-  public static PRMPlayer getPrimePlayer(int primeId, String summonerName) {
+  public static PRMPlayer getPrimePlayer(int primeId, RiotName name) {
     PRMPlayer player = new Query<>(PRMPlayer.class).where("prm_id", primeId).entity();
-    if (summonerName == null)
+    if (name == null)
       return player;
 
     if (player != null)
-      updatePrmAccount(player, summonerName);
+      updatePrmAccount(player, name);
     else {
-      player = createPlayer(summonerName, primeId);
+      player = createPlayer(name, primeId);
       if (player != null) player.setPrmUserId(primeId);
     }
     return player;
   }
 
-  private static void updatePrmAccount(@NonNull PRMPlayer player, @NonNull String summonerName) {
-    final Summoner summoner = Zeri.lol().getSummonerByName(summonerName);
-    final String puuid = summoner == null ? player.getPuuid() : summoner.getPUUID();
-    final String summonerId = summoner == null ? player.getSummonerId() : summoner.getSummonerId();
-    final String name = summoner == null ? player.getSummonerName() : summoner.getName();
+  private static void updatePrmAccount(@NonNull PRMPlayer player, @NonNull RiotName name) {
+    final RiotUser riotUser = Zeri.lol().getUserFromName(name);
+    final String puuid = Util.avoidNull(riotUser.getPUUID(), player.getPuuid());
+    final String summonerId = Util.avoidNull(player.getSummonerId(), player.getSummonerId());
 
     final Player p = new Query<>(Player.class).where("lol_puuid", puuid)
-                                              .and(Condition.Comparer.NOT_EQUAL, "player_id", player.getId()).entity();
+        .and(Condition.Comparer.NOT_EQUAL, "player_id", player.getId()).entity();
     if (p != null)
-      p.setPuuidAndName(null, null, null);
+      p.setPuuidAndName(null, null, RiotName.of(null, null));
 
+    name = Util.avoidNull(riotUser.updateName(), player.getName());
     if (player.getPuuid() == null) {
       if (puuid != null) player.setPuuidAndName(puuid, summonerId, name);
       return;
@@ -60,15 +61,14 @@ public final class PrimePlayerFactory {
   }
 
   @Nullable
-  private static PRMPlayer createPlayer(String summonerName, int primeId) {
-    final Summoner summoner = Zeri.lol().getSummonerByName(summonerName);
-    if (summoner != null) {
-      final String puuid = summoner.getPUUID();
-      final String summonerId = summoner.getSummonerId();
-      if (puuid != null) return new PRMPlayer(summonerName, puuid, summonerId, primeId).create();
-    }
+  private static PRMPlayer createPlayer(RiotName name, int primeId) {
+    final RiotUser riotUser = Zeri.lol().getUserFromName(name);
+    final String puuid = riotUser.getPUUID();
+    final String summonerId = riotUser.getSummonerId();
+    if (puuid != null && summonerId != null)
+      return new PRMPlayer(name, puuid, summonerId, primeId).create();
 
-    final PRMPlayer prmPlayer = (PRMPlayer) performNoPuuid(summonerName);
+    final PRMPlayer prmPlayer = (PRMPlayer) performNoPuuid(name);
     if (prmPlayer != null) {
       prmPlayer.setPrmUserId(primeId);
     }
@@ -76,16 +76,18 @@ public final class PrimePlayerFactory {
   }
 
   @Nullable
-  private static Player performNoPuuid(String summonerName) {
-    final Player player = determineExistingPlayerFromName(summonerName);
+  private static Player performNoPuuid(RiotName name) {
+    final Player player = determineExistingPlayerFromName(name);
     if (player == null) return null;
 
     new PlayerHandler(null, player).updateName();
-    return determineExistingPlayerFromName(summonerName);
+    return determineExistingPlayerFromName(name);
   }
 
-  private static Player determineExistingPlayerFromName(String summonerName) {
-    return summonerName == null ? null : new Query<>(Player.class).where("lol_name", summonerName).entity();
+  private static Player determineExistingPlayerFromName(RiotName name) {
+    if (name == null) return null;
+    return new Query<>(Player.class).where("lol_name", name.getName()).and("lol_tag", name.getTag())
+        .entity();
   }
 
   private static Player determineExistingPlayerFromPuuid(String puuid) {

@@ -236,7 +236,9 @@ public class TeamInfo {
     final List<Player> players = lineup.getFixedLineups().stream().map(Lineup::getPlayer).toList();
     return List.of(
         new MessageEmbed.Field(team.getFullName(), "Team", false),
-        new MessageEmbed.Field("Lineup", players.stream().map(Player::getSummonerName).collect(Collectors.joining("\n")), true),
+        new MessageEmbed.Field("Lineup",
+            players.stream().map(player -> player.getName().toString()).collect(Collectors.joining("\n")),
+            true),
         new MessageEmbed.Field("Elo (" + lineup.getAverageRank().toString() + ")", players.stream().map(Player::getRanks)
                                                                                           .map(PlayerRankHandler::getCurrent).map(
                         PlayerRank::toString).collect(Collectors.joining("\n")), true)

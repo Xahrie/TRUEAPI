@@ -98,7 +98,7 @@ public record ScoutingEmbedHandler(AbstractTeam team, ScoutingGameType gameType,
     for (Lane lane : Lane.values()) {
       if (lane.equals(Lane.UNKNOWN)) continue;
       fields = new EmbedFieldBuilder<>(fields, lineupCreator.getPlayersOnLane(lane))
-          .add(lane.getDisplayName(), laneGames -> laneGames.player().getSummonerName())
+          .add(lane.getDisplayName(), laneGames -> laneGames.player().getName().toString())
           .add("Rank (Solo/Duo)", laneGames -> laneGames.player().getRanks().getCurrent().toString())
           .add("Lanegames", laneGames -> String.valueOf(laneGames.amount()))
           .build();

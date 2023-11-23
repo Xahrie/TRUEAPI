@@ -17,6 +17,7 @@ import de.xahrie.trues.api.database.query.SQLEnum;
 import de.xahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.xahrie.trues.api.discord.util.Jinx;
 import de.xahrie.trues.api.riot.GameMap;
+import de.xahrie.trues.api.riot.api.RiotName;
 import de.xahrie.trues.api.util.Const;
 import lombok.Getter;
 import lombok.Setter;
@@ -147,12 +148,12 @@ public class Event implements Entity<Event> {
         final List<RoundParticipator> roundParticipators = new Query<>(RoundParticipator.class).where("event_round", round.getId()).and("team_index", 1).entityList();
         final List<RoundParticipator> roundParticipators2 = new Query<>(RoundParticipator.class).where("event_round", round.getId()).and("team_index", 1).entityList();
         description = "Team 1: " + roundParticipators.stream().map(RoundParticipator::getPlayer)
-            .map(Player::getSummonerName).collect(Collectors.joining(", ")) +
+            .map(Player::getName).map(RiotName::toString).collect(Collectors.joining(", ")) +
             "\nTeam 2: " + roundParticipators2.stream().map(RoundParticipator::getPlayer)
-            .map(Player::getSummonerName).collect(Collectors.joining(", "));
+            .map(Player::getName).map(RiotName::toString).collect(Collectors.joining(", "));
       } else {
         description = "Angemeldete Spieler: " + round.getParticipators().players().stream().map(RoundParticipator::getPlayer)
-            .map(Player::getSummonerName).collect(Collectors.joining(", "));
+            .map(Player::getName).map(RiotName::toString).collect(Collectors.joining(", "));
       }
       builder.addField(title, description, false);
     }

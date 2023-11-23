@@ -4,11 +4,12 @@ import java.time.LocalDateTime;
 
 import de.xahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.xahrie.trues.api.discord.user.DiscordUser;
+import de.xahrie.trues.api.riot.api.RiotName;
 
 public interface APlayer {
   String getPuuid();
-  String getSummonerName();
-  void setSummonerName(String summonerName);
+  RiotName getName();
+  void setSummonerName(RiotName name);
   DiscordUser getDiscordUser();
   void setDiscordUser(DiscordUser discordUser);
   AbstractTeam getTeam();

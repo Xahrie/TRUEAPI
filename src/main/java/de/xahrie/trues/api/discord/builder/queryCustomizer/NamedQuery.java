@@ -263,7 +263,7 @@ public enum NamedQuery {
     final List<List<Object[]>> out =  new ArrayList<>();
     for (List<PlayerRank> rank : ranks) {
       final List<Object[]> list = rank.stream().map(playerRank -> new Object[]{
-          playerRank.getPlayer().getSummonerName(),
+          playerRank.getPlayer().getName().toString(),
           Util.avoidNull(playerRank.getPlayer().getTeam(), "null", AbstractTeam::getName).keep(25),
           "Tier " + playerRank.getRank().division().ordinal() + " " + playerRank.getRank().points() + " LP (" + playerRank.getWinrate().format(Format.MEDIUM) + ")"
       }).toList();

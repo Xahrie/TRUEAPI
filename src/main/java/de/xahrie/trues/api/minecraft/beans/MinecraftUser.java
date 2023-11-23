@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Getter
-@Table("minecraft_user")
+@Table("mc_user")
 @ExtensionMethod(SQLUtils.class)
 public class MinecraftUser implements Entity<MinecraftUser> {
   @Serial

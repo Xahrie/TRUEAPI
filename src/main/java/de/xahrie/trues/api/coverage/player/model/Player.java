@@ -4,13 +4,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import de.xahrie.trues.api.coverage.team.model.PRMTeam;
 import de.xahrie.trues.api.coverage.team.model.AbstractTeam;
+import de.xahrie.trues.api.coverage.team.model.PRMTeam;
 import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Id;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.discord.user.DiscordUser;
 import de.xahrie.trues.api.riot.Zeri;
+import de.xahrie.trues.api.riot.api.RiotName;
+import de.xahrie.trues.api.riot.api.RiotUser;
 import de.xahrie.trues.api.riot.game.GameType;
 import de.xahrie.trues.api.riot.performance.PerformanceFactory;
 import de.xahrie.trues.api.scouting.PlayerAnalyzer;
@@ -19,8 +21,6 @@ import de.xahrie.trues.api.scouting.analyze.RiotPlayerAnalyzer;
 import de.xahrie.trues.api.util.Util;
 import lombok.Getter;
 import lombok.Setter;
-import no.stelar7.api.r4j.basic.constants.api.regions.LeagueShard;
-import no.stelar7.api.r4j.pojo.lol.summoner.Summoner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +31,7 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
   protected int id; // player_id
   protected String puuid; // lol_puuid
   protected String summonerId; // lol_summoner
-  protected String summonerName; // lol_name
+  protected RiotName name; // lol_name, lol_tag
   protected Integer discordUserId; // discord_user
   protected Integer teamId; // team
   protected LocalDateTime updated; // updated
@@ -81,7 +81,7 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
 
   public String getSummonerId() {
     if (summonerId == null) {
-      final String summonerId = Util.avoidNull(Zeri.lol().getSummonerByPlayer(this), Summoner::getSummonerId);
+      final String summonerId = getRiotUser().getSummonerId();
       if (summonerId != null) {
         this.summonerId = summonerId;
         new Query<>(Player.class).col("lol_summoner", summonerId).update(id);
@@ -90,8 +90,8 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
     return summonerId;
   }
 
-  public Player(String summonerName, String puuid, String summonerId) {
-    this.summonerName = summonerName;
+  public Player(RiotName name, String puuid, String summonerId) {
+    this.name = name;
     this.puuid = puuid;
     this.summonerId = summonerId;
     final Player playerFound = new Query<>(Player.class).where("lol_puuid", puuid).entity();
@@ -106,27 +106,31 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
     }
   }
 
-  protected Player(int id, String puuid, String summonerId, String summonerName, Integer discordUserId, Integer teamId, LocalDateTime updated, boolean played) {
+  protected Player(int id, String puuid, String summonerId, RiotName name, Integer discordUserId, Integer teamId,
+                   LocalDateTime updated, boolean played) {
     this.id = id;
     this.puuid = puuid;
     this.summonerId = summonerId;
-    this.summonerName = summonerName;
+    this.name = name;
     this.discordUserId = discordUserId;
     this.teamId = teamId;
     this.updated = updated;
     this.played = played;
   }
 
-  public void setPuuidAndName(String puuid, String summonerId, String name) {
+  public void setPuuidAndName(String puuid, String summonerId, @NotNull RiotName name) {
     this.puuid = puuid;
     this.summonerId = summonerId;
-    this.summonerName = name;
-    new Query<>(Player.class).col("lol_puuid", puuid).col("lol_summoner", puuid).col("lol_name", name).update(id);
+    this.name = name;
+    new Query<>(Player.class).col("lol_puuid", puuid).col("lol_summoner", puuid).col("lol_name", name.getName())
+        .col("lol_tag", name.getTag())
+        .update(id);
   }
 
-  public void setSummonerName(String summonerName) {
-    if (!summonerName.equals(this.summonerName)) new Query<>(Player.class).col("lol_name", summonerName).update(id);
-    this.summonerName = summonerName;
+  public void setSummonerName(@NotNull RiotName name) {
+    if (!name.equals(this.name))
+      new Query<>(Player.class).col("lol_name", name.getName()).col("lol_tag", name.getTag()).update(id);
+    this.name = name;
   }
 
   public void setUpdated(LocalDateTime updated) {
@@ -176,10 +180,16 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
 
   @Override
   public String toString() {
-    return summonerName + " | " + getRanks().getCurrent();
+    return name + " | " + getRanks().getCurrent();
   }
 
   public List<Object[]> getLastGames(GameType gameType) {
     return PerformanceFactory.getLastPlayerGames(gameType, this);
+  }
+
+  public RiotUser getRiotUser() {
+    if (puuid != null)
+      return Zeri.lol().getUserFromPuuid(puuid);
+    return Zeri.lol().getUserFromName(name);
   }
 }

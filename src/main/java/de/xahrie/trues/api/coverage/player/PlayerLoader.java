@@ -7,6 +7,7 @@ import de.xahrie.trues.api.coverage.GamesportsLoader;
 import de.xahrie.trues.api.coverage.Loader;
 import de.xahrie.trues.api.coverage.team.TeamFactory;
 import de.xahrie.trues.api.coverage.team.TeamLoader;
+import de.xahrie.trues.api.riot.api.RiotName;
 import de.xahrie.trues.api.util.StringUtils;
 import de.xahrie.trues.api.util.io.log.Console;
 import de.xahrie.trues.api.util.io.request.HTML;
@@ -41,9 +42,9 @@ public class PlayerLoader extends GamesportsLoader implements Loader {
 
   private PRMPlayer player;
 
-  public PlayerLoader(int primeId, String summonerName) {
+  public PlayerLoader(int primeId, RiotName riotName) {
     super(URLType.PLAYER, primeId);
-    this.player = PrimePlayerFactory.getPrimePlayer(primeId, summonerName);
+    this.player = PrimePlayerFactory.getPrimePlayer(primeId, riotName);
   }
 
   private PlayerLoader(int primeId) {

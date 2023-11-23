@@ -8,6 +8,7 @@ import de.xahrie.trues.api.coverage.player.PlayerHandler;
 import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Entity;
 import de.xahrie.trues.api.database.query.Query;
+import de.xahrie.trues.api.riot.api.RiotName;
 import lombok.Getter;
 
 @Getter
@@ -18,14 +19,14 @@ public class PRMPlayer extends Player implements Entity<PRMPlayer> {
 
   private Integer prmUserId; // prm_id
 
-  public PRMPlayer(String summonerName, String puuid, String summonerId, Integer prmUserId) {
-    super(summonerName, puuid, summonerId);
+  public PRMPlayer(RiotName name, String puuid, String summonerId, Integer prmUserId) {
+    super(name, puuid, summonerId);
     this.prmUserId = prmUserId;
   }
 
-  private PRMPlayer(int id, String puuid, String summonerId, String summonerName, Integer discordUserId, Integer teamId,
+  private PRMPlayer(int id, String puuid, String summonerId, RiotName name, Integer discordUserId, Integer teamId,
                     LocalDateTime updated, boolean played, Integer prmUserId) {
-    super(id, puuid, summonerId, summonerName, discordUserId, teamId, updated, played);
+    super(id, puuid, summonerId, name, discordUserId, teamId, updated, played);
     this.prmUserId = prmUserId;
   }
 
@@ -34,20 +35,21 @@ public class PRMPlayer extends Player implements Entity<PRMPlayer> {
         (int) objects.get(0),
         (String) objects.get(2),
         (String) objects.get(3),
-        (String) objects.get(4),
-        (Integer) objects.get(5),
+        RiotName.of((String) objects.get(4), (String) objects.get(5)),
         (Integer) objects.get(6),
-        (LocalDateTime) objects.get(7),
-        (boolean) objects.get(8),
-        (Integer) objects.get(9));
+        (Integer) objects.get(7),
+        (LocalDateTime) objects.get(8),
+        (boolean) objects.get(9),
+        (Integer) objects.get(10));
   }
 
   @Override
   public PRMPlayer create() {
     boolean notExisting = (prmUserId != null && new Query<>(PRMPlayer.class).where("prm_id", prmUserId).entity(List.of()) == null);
     final PRMPlayer player = new Query<>(PRMPlayer.class).key("lol_puuid", puuid)
-        .col("lol_summoner", summonerId).col("lol_name", summonerName).col("discord_user", discordUserId).col("team", teamId)
-        .col("updated", updated).col("played", played).col("prm_id", prmUserId)
+        .col("lol_summoner", summonerId).col("lol_name", name.getName()).col("lol_tag", name.getTag())
+        .col("discord_user", discordUserId).col("team", teamId).col("updated", updated).col("played", played)
+        .col("prm_id", prmUserId)
         .insert(this);
     if (notExisting) new PlayerHandler(null, this).updateElo();
     return player;

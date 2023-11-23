@@ -10,6 +10,7 @@ import de.xahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.xahrie.trues.api.coverage.team.model.AbstractTeam;
 import de.xahrie.trues.api.coverage.team.model.PRMTeam;
 import de.xahrie.trues.api.coverage.GamesportsLoader;
+import de.xahrie.trues.api.riot.api.RiotName;
 import de.xahrie.trues.api.util.StringUtils;
 import de.xahrie.trues.api.util.io.request.HTML;
 import de.xahrie.trues.api.util.io.request.URLType;
@@ -83,8 +84,8 @@ public class TeamLoader extends GamesportsLoader {
     for (HTML user : html.find("ul", HTML.PLAYERS + "-l").findAll("li")) {
       final int primeId = user.find("a").getAttribute("href").between("/users/", "-").intValue();
       if (primeId == prmId) {
-        final String summonerName = user.find("div", HTML.DESCRIPTION).find("span").text();
-        final PRMPlayer primePlayer = PrimePlayerFactory.getPrimePlayer(primeId, summonerName);
+        final String name = user.find("div", HTML.DESCRIPTION).find("span").text();
+        final PRMPlayer primePlayer = PrimePlayerFactory.getPrimePlayer(primeId, RiotName.of(name));
         if (primePlayer != null) primePlayer.setTeam(team);
         return primePlayer;
       }
@@ -101,15 +102,16 @@ public class TeamLoader extends GamesportsLoader {
     final var players = new ArrayList<PRMPlayer>();
     for (HTML user : html.find("ul", HTML.PLAYERS + "-l").findAll("li")) {
       final int primeId = user.find("a").getAttribute("href").between("/users/", "-").intValue();
-      final String summonerName = user.find("div", HTML.DESCRIPTION).find("span").text();
-      final PRMPlayer player = PrimePlayerFactory.getPrimePlayer(primeId, summonerName);
+      final String name = user.find("div", HTML.DESCRIPTION).find("span").text();
+      final PRMPlayer player = PrimePlayerFactory.getPrimePlayer(primeId, RiotName.of(name));
       if (player != null) {
         player.setTeam(team);
         players.add(player);
       }
     }
 
-    team.getPlayers().stream().filter(player -> !players.contains((PRMPlayer) player)).filter(Objects::nonNull).forEach(player -> new PlayerLoader(((PRMPlayer) player).getPrmUserId(), player.getSummonerName()).handleLeftTeam());
+    team.getPlayers().stream().filter(player -> !players.contains((PRMPlayer) player)).filter(Objects::nonNull)
+        .forEach(player -> new PlayerLoader(((PRMPlayer) player).getPrmUserId(), player.getName()).handleLeftTeam());
     return players;
   }
 

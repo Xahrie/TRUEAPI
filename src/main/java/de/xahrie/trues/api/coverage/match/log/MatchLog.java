@@ -19,6 +19,7 @@ import de.xahrie.trues.api.database.query.Entity;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.database.query.SQLEnum;
 import de.xahrie.trues.api.datatypes.calendar.TimeFormat;
+import de.xahrie.trues.api.riot.api.RiotName;
 import de.xahrie.trues.api.util.StringUtils;
 import de.xahrie.trues.api.util.Util;
 import lombok.Getter;
@@ -97,11 +98,12 @@ public class MatchLog implements Entity<MatchLog>, Comparable<MatchLog> {
           .collect(Collectors.joining("\n"));
     }
     if (action.equals(MatchLogAction.LINEUP_SUBMIT)) {
-      final String players = getParticipator().getTeamLineup().getFixedLineups().stream().map(
-                                                      Lineup::getPlayer).map(Player::getSummonerName)
-                                              .collect(Collectors.joining(", "));
+      final String players = getParticipator().getTeamLineup().getFixedLineups().stream()
+          .map(Lineup::getPlayer).map(Player::getName).map(RiotName::toString)
+          .collect(Collectors.joining(", "));
       if (isMostRecentLogOfType()) {
-        final String linkPlayers = players.replace(", ", ",").replace(" ", "%20");
+        final String linkPlayers = players.replace(", ", ",").replace(" ", "%20")
+            .replace("#", "%23");
         return players + "[Op.gg](https://euw.op.gg/multisearch/euw?summoners=" + linkPlayers + ") - [Poro](" + linkPlayers + "/season)";
       }
       return players;

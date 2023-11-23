@@ -99,7 +99,7 @@ public class Performance implements Entity<Performance>, Comparable<Performance>
   }
 
   public String getPlayername() {
-    return getPlayer().getSummonerName();
+    return getPlayer().getName().toString();
   }
 
   public String getStats() {

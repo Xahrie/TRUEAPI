@@ -59,7 +59,7 @@ public class ScoutingManager {
     final String championOutput = Util.avoidNull(champion, "alle", Champion::getName);
     final String laneOutput = Util.avoidNull(lane, "alle", Lane::getDisplayName);
     final EmbedBuilder builder = new EmbedBuilder()
-        .setTitle("Matchhistory von " + player.getSummonerName())
+        .setTitle("Matchhistory von " + player.getName().toString())
         .setDescription("Gametyp: **" + gameType.getDisplayName() + "**\nChampion: **" + championOutput + "**\nLane: **" + laneOutput + "**");
     player.analyze(gameType, 1000).analyzeGamesWith(champion, lane).forEach(builder::addField);
     event.getHook().sendMessageEmbeds(builder.build()).queue();

@@ -124,7 +124,8 @@ public class PlayerAnalyzer extends AnalyzeManager {
         .get("concat(round(avg(_performance.vision), 0), '')", String.class)
         .single();
     final String csOrVision = (String) (lane.equals(Lane.UTILITY) ? data[4] : data[3]);
-    return new MessageEmbed.Field(lane.getDisplayName() + ": " + player().getSummonerName() + "(" + getGames() + " Games - " +
+    return new MessageEmbed.Field(lane.getDisplayName() + ": " + player().getName().getName() + "(" + getGames() + " Games " +
+        "- " +
         player().getRanks().getCurrent() + ")",
         "KDA: " + data[0] + " - Gold: " + data[1] + " - Damage: " + data[2] + " - CS/VS: " + csOrVision, false);
   }

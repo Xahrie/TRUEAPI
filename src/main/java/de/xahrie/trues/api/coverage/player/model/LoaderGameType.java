@@ -2,6 +2,7 @@ package de.xahrie.trues.api.coverage.player.model;
 
 import java.util.List;
 
+import de.xahrie.trues.api.riot.api.RiotUser;
 import de.xahrie.trues.api.riot.match.MatchHistoryBuilder;
 import no.stelar7.api.r4j.basic.constants.types.lol.GameQueueType;
 import no.stelar7.api.r4j.pojo.lol.summoner.Summoner;
@@ -12,8 +13,8 @@ public enum LoaderGameType {
   CLASH,
   MATCHMADE;
 
-  public List<String> getMatchHistory(Summoner summoner, Player player) {
-    final var mh = new MatchHistoryBuilder(summoner, player.getUpdated());
+  public List<String> getMatchHistory(RiotUser riotUser, Player player) {
+    final var mh = new MatchHistoryBuilder(riotUser, player.getUpdated());
     return (switch (this) {
       case MATCHMADE -> mh.all();
       case CLASH -> mh.with(GameQueueType.CLASH);

@@ -74,7 +74,7 @@ public record RankedNotifier(Player player, List<Performance> playedPerformances
       if (Const.RANKED_STATE.ordinal() < 2) {
         if (newRank.tier().equals(Rank.RankTier.UNRANKED)) return;
 
-        final String message = user.getMention() + " (" + player.getSummonerName() +
+        final String message = user.getMention() + " (" + player.getName() +
             ") hat einen neuen Rank erreicht\n" + oldRank + " --> " + newRank;
         Jinx.instance.getChannels().getTextChannel(DefinedTextChannel.RANKED)
             .sendMessage(message).queue();
@@ -123,7 +123,7 @@ public record RankedNotifier(Player player, List<Performance> playedPerformances
     if (playedPerformances.isEmpty()) return true;
 
     final EmbedBuilder embedBuilder = new EmbedBuilder()
-        .setTitle("Neue Matches von " + user.getMention() + " (" + player.getSummonerName() + ")")
+        .setTitle("Neue Matches von " + user.getMention() + " (" + player.getName() + ")")
         .setDescription(description);
     for (int i = 0; i < playedPerformances.size(); i++) {
       if (i == 20) break;
