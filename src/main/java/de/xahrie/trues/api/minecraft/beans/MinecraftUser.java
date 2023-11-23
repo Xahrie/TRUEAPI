@@ -88,7 +88,7 @@ public class MinecraftUser implements Entity<MinecraftUser> {
         (int) objects.get(3),
         (int) objects.get(4),
         (LocalDateTime) objects.get(5),
-        (short) objects.get(6),
+        SQLUtils.shortValue(objects.get(6)),
         (boolean) objects.get(7),
         SQLUtils.intValue(objects.get(8)),
         (LocalDateTime) objects.get(9)
