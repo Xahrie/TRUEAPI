@@ -11,6 +11,7 @@ import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Entity;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.discord.user.DiscordUser;
+import de.xahrie.trues.api.util.Util;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
@@ -162,7 +163,8 @@ public class MinecraftUser implements Entity<MinecraftUser> {
 
   public void handleName() {
     updateName();
-    final String nameToDisplay = ChatColor.GRAY + getPlayer().getName();
+    final ChatColor chatColor = Util.avoidNull(getMinecraftTeam(), ChatColor.GRAY, team -> team.getColor().getColor());
+    final String nameToDisplay = chatColor + getPlayer().getName();
     final Player player = getPlayer().getPlayer();
     if (player != null) {
       player.setDisplayName(nameToDisplay);
