@@ -112,8 +112,8 @@ public class MinecraftUser implements Entity<MinecraftUser> {
       this.minecraftTeam = null;
       this.teamId = null;
       this.joined = null;
-    } else if (minecraftTeam.getId() != this.minecraftTeam.getId()) {
-      this.minecraftTeam = null;
+    } else if (this.minecraftTeam == null || (minecraftTeam.getId() != this.minecraftTeam.getId())) {
+      this.minecraftTeam = minecraftTeam;
       this.teamId = minecraftTeam.getId();
       this.joined = LocalDateTime.now();
     }
