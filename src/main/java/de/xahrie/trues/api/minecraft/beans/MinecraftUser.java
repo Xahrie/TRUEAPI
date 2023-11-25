@@ -1,5 +1,11 @@
 package de.xahrie.trues.api.minecraft.beans;
 
+import java.io.Serial;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 import de.xahrie.trues.api.database.connector.SQLUtils;
 import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Entity;
@@ -13,12 +19,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
-
-import java.io.Serial;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Table("mc_user")
@@ -31,7 +33,7 @@ public class MinecraftUser implements Entity<MinecraftUser> {
   private int id;
   private final UUID uuid;
   private String name;
-  private final int discordUserId;
+  private final Integer discordUserId;
   private int timePlayed;
   private LocalDateTime lastOnline;
   private short deaths;
@@ -54,7 +56,7 @@ public class MinecraftUser implements Entity<MinecraftUser> {
     return minecraftTeam;
   }
 
-  public MinecraftUser(UUID uuid, String name, DiscordUser discordUser) {
+  public MinecraftUser(@NotNull UUID uuid, @NotNull String name, @NotNull DiscordUser discordUser) {
     this.uuid = uuid;
     this.name = name;
     this.discordUser = discordUser;
@@ -66,7 +68,8 @@ public class MinecraftUser implements Entity<MinecraftUser> {
     this.joined = null;
   }
 
-  private MinecraftUser(int id, UUID uuid, String name, int discordUserId, int timePlayed, LocalDateTime lastOnline,
+  private MinecraftUser(int id, UUID uuid, String name, @Nullable Integer discordUserId, int timePlayed,
+                        LocalDateTime lastOnline,
                         short deaths, boolean whitelisted, Integer teamId, LocalDateTime joined) {
     this.id = id;
     this.uuid = uuid;
@@ -85,7 +88,7 @@ public class MinecraftUser implements Entity<MinecraftUser> {
         (int) objects.get(0),
         UUID.fromString((String) objects.get(1)),
         (String) objects.get(2),
-        (int) objects.get(3),
+        SQLUtils.intValue(objects.get(3)),
         (int) objects.get(4),
         (LocalDateTime) objects.get(5),
         SQLUtils.shortValue(objects.get(6)),

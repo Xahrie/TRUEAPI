@@ -10,7 +10,6 @@ import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.database.query.SQLEnum;
 import de.xahrie.trues.api.minecraft.beans.enums.MinecraftColor;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -41,8 +40,8 @@ public final class MinecraftTeam implements Entity<MinecraftTeam> {
     return creator;
   }
 
-  public MinecraftTeam(@NonNull String name, @NonNull String abbreviation, @NonNull String password,
-                       @NonNull MinecraftUser creator) {
+  public MinecraftTeam(@NotNull String name, @NotNull String abbreviation, @NotNull String password,
+                       @NotNull MinecraftUser creator) {
     this.name = name;
     this.abbreviation = abbreviation;
     this.password = password;
@@ -51,8 +50,8 @@ public final class MinecraftTeam implements Entity<MinecraftTeam> {
     this.creatorId = creator.getId();
   }
 
-  public MinecraftTeam(@NonNull String name, @NonNull String abbreviation, @NonNull String password,
-                       @NonNull MinecraftColor color, @NonNull MinecraftUser creator) {
+  public MinecraftTeam(@NotNull String name, @NotNull String abbreviation, @NotNull String password,
+                       @NotNull MinecraftColor color, @NotNull MinecraftUser creator) {
     this.name = name;
     this.abbreviation = abbreviation;
     this.password = password;
@@ -61,8 +60,8 @@ public final class MinecraftTeam implements Entity<MinecraftTeam> {
     this.creatorId = creator.getId();
   }
 
-  private MinecraftTeam(int id, @NonNull String name, @NonNull String abbreviation, @NonNull String password,
-                        @NonNull MinecraftColor color, Integer centerX, Integer centerY, int creatorId) {
+  private MinecraftTeam(int id, @NotNull String name, @NotNull String abbreviation, @NotNull String password,
+                        @NotNull MinecraftColor color, Integer centerX, Integer centerY, int creatorId) {
     this.id = id;
     this.name = name;
     this.abbreviation = abbreviation;
@@ -128,14 +127,14 @@ public final class MinecraftTeam implements Entity<MinecraftTeam> {
       new Query<>(MinecraftTeam.class).col("center_y", location.getBlockZ()).update(id);
     this.centerY = location.getBlockZ();
   }
-  public void setCreator(@NonNull MinecraftUser creator) {
+  public void setCreator(@NotNull MinecraftUser creator) {
     if (Objects.equals(this.creator, creator))
       new Query<>(MinecraftTeam.class).col("creator", creator.getId()).update(id);
     this.creator = creator;
     this.creatorId = creator.getId();
   }
 
-  @NonNull
+  @NotNull
   public List<MinecraftUser> getMembers() {
     return new Query<>(MinecraftUser.class).where("mc_team", getId()).entityList();
   }
@@ -152,7 +151,7 @@ public final class MinecraftTeam implements Entity<MinecraftTeam> {
     return name + " (" + abbreviation + ")";
   }
 
-  public void sendTeamMessage(@NonNull Player source, @NonNull String message) {
+  public void sendTeamMessage(@NotNull Player source, @NotNull String message) {
     for (MinecraftUser survivalUser : getMembers()) {
       final Player survivalPlayer = survivalUser.getPlayer().getPlayer();
       if (survivalPlayer == null) continue;
