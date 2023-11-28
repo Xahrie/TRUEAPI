@@ -14,6 +14,7 @@ import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -28,8 +29,7 @@ public final class MinecraftTeam implements Entity<MinecraftTeam> {
   private String abbreviation;
   private String password;
   private MinecraftColor color;
-  private Integer centerX;
-  private Integer centerY;
+  private MinecraftLocation center;
   private int creatorId;
 
   private MinecraftUser creator;
@@ -61,14 +61,13 @@ public final class MinecraftTeam implements Entity<MinecraftTeam> {
   }
 
   private MinecraftTeam(int id, @NotNull String name, @NotNull String abbreviation, @NotNull String password,
-                        @NotNull MinecraftColor color, Integer centerX, Integer centerY, int creatorId) {
+                        @NotNull MinecraftColor color, MinecraftLocation center, int creatorId) {
     this.id = id;
     this.name = name;
     this.abbreviation = abbreviation;
     this.password = password;
     this.color = color;
-    this.centerX = centerX;
-    this.centerY = centerY;
+    this.center = center;
     this.creatorId = creatorId;
   }
 
@@ -76,19 +75,26 @@ public final class MinecraftTeam implements Entity<MinecraftTeam> {
   public MinecraftTeam create() {
     return new Query<>(MinecraftTeam.class).key("team_name", name)
         .col("team_abbr", abbreviation).col("team_password", password).col("color", color)
-        .col("center_x", centerX).col("center_y", centerY).col("creator", creatorId)
+        .col("center_x", center.x()).col("center_y", center.y()).col("center_height", center.height())
+        .col("center_world", center.worldName()).col("creator", creatorId)
         .insert(this);
   }
 
-  public static MinecraftTeam get(List<Object> objects) {
+  @NotNull
+  @Contract("_ -> new")
+  public static MinecraftTeam get(@NotNull List<Object> objects) {
     return new MinecraftTeam(
         (int) objects.get(0),
         (String) objects.get(1),
         (String) objects.get(2),
         (String) objects.get(3),
         new SQLEnum<>(MinecraftColor.class).of(objects.get(4)),
-        SQLUtils.intValue(objects.get(5)),
-        SQLUtils.intValue(objects.get(6)),
+        new MinecraftLocation(
+            (String) objects.get(9),
+            SQLUtils.intValue(objects.get(5)),
+            SQLUtils.intValue(objects.get(6)),
+            SQLUtils.intValue(objects.get(8))
+        ),
         (int) objects.get(7)
     );
   }
@@ -117,16 +123,15 @@ public final class MinecraftTeam implements Entity<MinecraftTeam> {
     this.password = password;
   }
 
-  public void setLocation(@NotNull Location location) {
-    setCenterX(location.getBlockX());
-    if (Objects.equals(this.centerX, location.getBlockX()))
-      new Query<>(MinecraftTeam.class).col("center_x", location.getBlockX()).update(id);
-    this.centerX = location.getBlockX();
+  public void setCenter(Location location) {
+    final MinecraftLocation newCenter = MinecraftLocation.of(location);
+    if (Objects.equals(this.center, newCenter)) return;
 
-    if (Objects.equals(this.centerY, location.getBlockZ()))
-      new Query<>(MinecraftTeam.class).col("center_y", location.getBlockZ()).update(id);
-    this.centerY = location.getBlockZ();
+    new Query<>(MinecraftTeam.class).col("center_x", newCenter.x()).col("center_y", newCenter.y())
+        .col("center_height", newCenter.height()).col("center_world", newCenter.worldName()).update(id);
+    this.center = newCenter;
   }
+
   public void setCreator(@NotNull MinecraftUser creator) {
     if (Objects.equals(this.creator, creator))
       new Query<>(MinecraftTeam.class).col("creator", creator.getId()).update(id);
@@ -168,11 +173,15 @@ public final class MinecraftTeam implements Entity<MinecraftTeam> {
 
   @Override
   public String toString() {
-    return "MinecraftTeam[" +
-        "id=" + id + ", " +
-        "name=" + name + ", " +
-        "abbreviation=" + abbreviation + ", " +
-        "color=" + color + ", " +
-        "creator=" + creatorId + ']';
+    return "MinecraftTeam{" +
+        "id=" + id +
+        ", name='" + name + '\'' +
+        ", abbreviation='" + abbreviation + '\'' +
+        ", password='" + password + '\'' +
+        ", color=" + color +
+        ", center=" + center +
+        ", creatorId=" + creatorId +
+        ", creator=" + creator +
+        '}';
   }
 }

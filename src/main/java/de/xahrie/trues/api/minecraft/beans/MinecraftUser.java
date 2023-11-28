@@ -108,21 +108,30 @@ public class MinecraftUser implements Entity<MinecraftUser> {
         .insert(this);
   }
 
-  public void join(MinecraftTeam minecraftTeam) {
-    if (minecraftTeam == null) {
+  public void join(MinecraftTeam team) {
+    if (team == null) {
       this.minecraftTeam = null;
       this.teamId = null;
       this.joined = null;
-    } else if (this.minecraftTeam == null || (minecraftTeam.getId() != this.minecraftTeam.getId())) {
-      this.minecraftTeam = minecraftTeam;
-      this.teamId = minecraftTeam.getId();
+    } else if (this.minecraftTeam == null || (team.getId() != this.minecraftTeam.getId())) {
+      this.minecraftTeam = team;
+      this.teamId = team.getId();
       this.joined = LocalDateTime.now();
     }
 
     new Query<>(MinecraftUser.class).col("mc_team", teamId).col("team_joined", joined).update(id);
+    handleName();
+    if (team == null) return;
+
+    final Player player = getPlayer().getPlayer();
+    if (player != null)
+      team.sendTeamMessage(player, player.getDisplayName() + " ist nun Mitglied dieses Teams.");
   }
 
   public void leave() {
+    final Player player = getPlayer().getPlayer();
+    if (player != null)
+      getMinecraftTeam().sendTeamMessage(player, name + " hat das Team verlassen.");
     join(null);
   }
 
@@ -138,9 +147,11 @@ public class MinecraftUser implements Entity<MinecraftUser> {
     this.whitelisted = whitelisted;
   }
 
-  public void addDeath() {
-    this.deaths++;
+  public void updateDeaths() {
+    final Player player = getPlayer().getPlayer();
+    this.deaths = (short) ((player != null)  ? player.getStatistic(Statistic.DEATHS) : deaths+1);
     new Query<>(MinecraftUser.class).col("deaths", deaths).update(id);
+    handleName();
   }
 
   public void updateTimePlayed() {
@@ -156,9 +167,23 @@ public class MinecraftUser implements Entity<MinecraftUser> {
 
   public String getTimePlayedString() {
     updateTimePlayed();
-    if (timePlayed < 60) return ":" + timePlayed;
-    else if (timePlayed < 600) return (timePlayed / 60) + ":" + Math.round((timePlayed % 60) / 6.);
-    return Math.round(timePlayed / 60.) + "h";
+    final int secondsPlayed = getPlayer().getStatistic(Statistic.PLAY_ONE_MINUTE) / (20);
+    String seconds = (secondsPlayed % 60) + "";
+    seconds = ("00" + seconds).substring(seconds.length());
+    String minutes = (secondsPlayed / 60 % 60) + "";
+
+    if (secondsPlayed < 60) return ":" + seconds;
+    if (secondsPlayed < 60 * 10) return minutes + ":" + seconds;
+
+    minutes = ("00" + minutes).substring(minutes.length());
+    if (secondsPlayed < 60 * 100) return minutes + ":" + seconds;
+
+    String hours = (secondsPlayed / 3600) + "";
+    if (secondsPlayed < 60 * 60 * 10) return hours + ":" + minutes;
+
+    hours = ("00" + hours).substring(hours.length());
+    if (secondsPlayed < 60 * 60 * 100) return hours + ":" + minutes;
+    return hours + "h";
   }
 
   public void handleName() {
