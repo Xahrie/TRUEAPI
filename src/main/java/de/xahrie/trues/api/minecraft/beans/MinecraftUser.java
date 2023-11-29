@@ -170,16 +170,17 @@ public class MinecraftUser implements Entity<MinecraftUser> {
     final int secondsPlayed = getPlayer().getStatistic(Statistic.PLAY_ONE_MINUTE) / (20);
     String seconds = (secondsPlayed % 60) + "";
     seconds = ("00" + seconds).substring(seconds.length());
-    String minutes = (secondsPlayed / 60 % 60) + "";
+    String minutes = (secondsPlayed / 60) + "";
 
     if (secondsPlayed < 60) return ":" + seconds;
-    if (secondsPlayed < 60 * 10) return minutes + ":" + seconds;
+    if (secondsPlayed < 60 * 10) return minutes + ":" + seconds + "m";
 
     minutes = ("00" + minutes).substring(minutes.length());
     if (secondsPlayed < 60 * 100) return minutes + ":" + seconds;
 
+    minutes = (secondsPlayed / 60 % 60) + "";
     String hours = (secondsPlayed / 3600) + "";
-    if (secondsPlayed < 60 * 60 * 10) return hours + ":" + minutes;
+    if (secondsPlayed < 60 * 60 * 10) return hours + ":" + minutes + "h";
 
     hours = ("00" + hours).substring(hours.length());
     if (secondsPlayed < 60 * 60 * 100) return hours + ":" + minutes;
