@@ -63,7 +63,7 @@ public class RiotUser {
 
   public String getPUUID() {
     if (puuid == null)
-      this.puuid = getAccount().getPUUID();
+      this.puuid = Util.avoidNull(getAccount(), getSummoner().getPUUID(), RiotAccount::getPUUID);
     return puuid;
   }
 
@@ -74,8 +74,10 @@ public class RiotUser {
   }
 
   public RiotName getName() {
-    if (name == null || name.getTag() == null)
+    if (name == null || name.getTag() == null) {
+      if (getAccount() == null) return null;
       this.name = RiotName.of(getAccount());
+    }
     return name;
   }
 

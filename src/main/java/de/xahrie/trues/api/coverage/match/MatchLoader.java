@@ -40,11 +40,11 @@ public class MatchLoader extends GamesportsLoader {
     this.match = match;
   }
 
-  MatchLoader(int matchId) {
+  public MatchLoader(int matchId) {
     super(URLType.MATCH, matchId);
   }
 
-  MatchLoader create() {
+  public MatchLoader create() {
     final String seasonName = html.find("h1").text().before(":");
     final PRMSeason season = new Query<>(PRMSeason.class).where("season_full", seasonName).entity();
     if (season == null) {
