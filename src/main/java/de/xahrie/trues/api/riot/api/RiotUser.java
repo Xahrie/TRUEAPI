@@ -13,6 +13,7 @@ import no.stelar7.api.r4j.basic.constants.types.lol.MatchlistMatchType;
 import no.stelar7.api.r4j.pojo.lol.championmastery.ChampionMastery;
 import no.stelar7.api.r4j.pojo.lol.summoner.Summoner;
 import no.stelar7.api.r4j.pojo.shared.RiotAccount;
+import org.jetbrains.annotations.Nullable;
 
 @ExtensionMethod(StringUtils.class)
 public class RiotUser {
@@ -61,9 +62,10 @@ public class RiotUser {
     return summoner;
   }
 
+  @Nullable
   public String getPUUID() {
     if (puuid == null)
-      this.puuid = Util.avoidNull(getAccount(), getSummoner().getPUUID(), RiotAccount::getPUUID);
+      this.puuid = Util.avoidNull(getAccount(), Util.avoidNull(getSummoner(), Summoner::getPUUID), RiotAccount::getPUUID);
     return puuid;
   }
 
