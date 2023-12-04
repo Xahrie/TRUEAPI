@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.xahrie.trues</groupId>
     <artifactId>trueapi</artifactId>
-    <version>3.3.65</version>
+    <version>3.3.66</version>
     <name>trueapi</name>
 
     <properties>
@@ -46,6 +46,7 @@
                 <configuration>
                     <encoding>UTF-8</encoding>
                     <source>21</source>
+                    <release>21</release>
                     <target>21</target>
                     <!-- <modules>
                         <ejbModule>
