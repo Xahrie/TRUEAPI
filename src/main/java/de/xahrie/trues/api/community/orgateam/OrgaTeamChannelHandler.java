@@ -1,6 +1,9 @@
 package de.xahrie.trues.api.community.orgateam;
 
+import java.util.List;
+
 import de.xahrie.trues.api.community.orgateam.teamchannel.TeamChannel;
+import de.xahrie.trues.api.community.orgateam.teamchannel.TeamChannelRepository;
 import de.xahrie.trues.api.community.orgateam.teamchannel.TeamChannelType;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.discord.channel.ChannelType;
@@ -12,6 +15,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.java.Log;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import org.jetbrains.annotations.Nullable;
@@ -81,8 +85,12 @@ public class OrgaTeamChannelHandler {
       DiscordChannelType.TEXT.createTeamChannel(category, TeamChannelType.CHAT, team);
       DiscordChannelType.TEXT.createTeamChannel(category, TeamChannelType.INFO, team);
       DiscordChannelType.TEXT.createTeamChannel(category, TeamChannelType.SCOUTING, team);
-      DiscordChannelType.VOICE.createTeamChannel(category, TeamChannelType.PRACTICE, team);
+      DiscordChannelType.STAGE.createTeamChannel(category, TeamChannelType.PRACTICE, team);
     });
+  }
+
+  public List<TeamChannel> getChannels() {
+    return new Query<>(TeamChannel.class).where("orga_team", team).entityList();
   }
 
   /**
@@ -94,5 +102,9 @@ public class OrgaTeamChannelHandler {
     final DiscordChannelType discordChannelType = DiscordChannelType.valueOf(channel.getType().name());
     final ChannelType type = channelType.equals(TeamChannelType.VOICE) ? ChannelType.ORGA_INTERN : ChannelType.TEAM;
     return new TeamChannel(channel.getIdLong(), channel.getName(), type, discordChannelType, team, channelType).forceCreate();
+  }
+
+  public void updateLeaderPermissions() {
+    getChannels().forEach(TeamChannel::updateLeaderPermissions);
   }
 }

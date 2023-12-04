@@ -8,7 +8,9 @@ import de.xahrie.trues.api.discord.group.DiscordGroup;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.java.Log;
+import net.dv8tion.jda.api.entities.IPermissionHolder;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.attribute.ICategorizableChannel;
 import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
@@ -43,12 +45,5 @@ public abstract class AbstractDiscordChannel implements ADiscordChannel, Id {
   public void setPermissionType(ChannelType permissionType) {
     this.permissionType = permissionType;
     new Query<>(AbstractDiscordChannel.class).col("permission_type", permissionType).update(id);
-  }
-
-  public boolean updatePermission(Role role) {
-    final DiscordGroup group = DiscordGroup.of(role);
-    if (group == null) return false;
-    updateForGroup(group);
-    return true;
   }
 }

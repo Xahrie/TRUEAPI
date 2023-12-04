@@ -38,6 +38,7 @@ public enum DiscordGroup implements Roleable {
   BOTTOM(53, "Bottom", 1004701775254790215L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE),
   SUPPORT(54, "Support", 1004701819605368894L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE),
   HELP(55, "Selbsthilfe", 1072087015782371328L, GroupTier.EVERYONE, Department.NONE, GroupType.PINGABLE),
+  HONORABLE(55, "Ehrenmitglied", 1169779833274912788L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.ORGA_MEMBER),
 
 
   ORGA_MEMBER(101, "Ein TRUE", 1035215421625864273L, GroupTier.ORGA_MEMBER, Department.NONE, GroupType.ORGA_MEMBER),
@@ -79,7 +80,7 @@ public enum DiscordGroup implements Roleable {
 
   public static DiscordGroup of(String name) {
     final Stream<DiscordGroup> groups = Arrays.stream(DiscordGroup.values());
-    return groups.filter(group -> name.equalsIgnoreCase(group.getName()))
+    return groups.filter(group -> name.equalsIgnoreCase(group.getName()) || name.equalsIgnoreCase(group.name()))
         .findFirst().orElse(null);
   }
 

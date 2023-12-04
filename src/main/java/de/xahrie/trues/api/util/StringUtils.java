@@ -119,6 +119,19 @@ public class StringUtils {
     return Util.avoidNull(aDouble, Double::intValue);
   }
 
+
+  /**
+   * @return -1 if not a number
+   */
+  public static long longValue(String value) {
+    return longValue(value, -1);
+  }
+
+  public static Long longValue(String value, Integer defaultValue) {
+    final Double aDouble = doubleValue(value, Util.avoidNull(defaultValue, null, Double::valueOf));
+    return Util.avoidNull(aDouble, Double::longValue);
+  }
+
   /**
    * @return -1 if not a number
    */

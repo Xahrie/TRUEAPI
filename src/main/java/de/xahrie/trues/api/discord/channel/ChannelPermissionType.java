@@ -1,26 +1,29 @@
 package de.xahrie.trues.api.discord.channel;
 
-import de.xahrie.trues.api.community.orgateam.OrgaTeamFactory;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import de.xahrie.trues.api.community.member.Membership;
+import de.xahrie.trues.api.community.orgateam.OrgaTeam;
 import de.xahrie.trues.api.database.connector.Listing;
 import de.xahrie.trues.api.datatypes.collections.SortedList;
 import de.xahrie.trues.api.discord.group.DiscordGroup;
+import de.xahrie.trues.api.discord.user.DiscordUser;
 import de.xahrie.trues.api.discord.util.Jinx;
 import de.xahrie.trues.api.util.StringUtils;
+import de.xahrie.trues.api.util.Util;
+import de.xahrie.trues.api.util.io.cfg.JSON;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.IPermissionHolder;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
+import org.json.JSONObject;
 
 @RequiredArgsConstructor
 @Getter
@@ -44,47 +47,84 @@ public enum ChannelPermissionType {
 
   private final Long channelId;
 
-  @NonNull
-  private List<Long> getViewableRoles() {
-    final GuildChannel channel = Jinx.instance.getChannels().getChannel(channelId);
-    if (channel instanceof AudioChannel) return List.of();
-    if (channel instanceof StandardGuildMessageChannel messageChannel) return messageChannel.getTopic() == null ? List.of() :
-        Arrays.stream(messageChannel.getTopic().before("//").strip().split(",")).map(Long::parseLong).toList();
-    throw new IllegalArgumentException("Hier sollte Schluss sein!");
+  @Nullable
+  public List<APermissionOverride> getPermissions(@Nullable OrgaTeam team) {
+    return getOverrides(team, false);
   }
 
   @Nullable
-  public List<APermissionOverride> getPermissions() {
+  public List<APermissionOverride> getLeaderPermissions(@Nullable OrgaTeam team) {
+    return getOverrides(team, true);
+  }
+
+  private List<APermissionOverride> getOverrides(@Nullable OrgaTeam team, boolean leaderOnly) {
     if (channelId == null) return null;
-    return Jinx.instance.getChannels().getChannel(channelId).getPermissionContainer().getPermissionOverrides().stream().map(permissionOverride -> new APermissionOverride(permissionOverride.getPermissionHolder(), permissionOverride.getAllowed(), permissionOverride.getDenied(), getViewableRoles())).toList();
+
+    final Map<IPermissionHolder, APermissionOverride> overrides = new HashMap<>();
+    final var json = JSON.read("apis.json");
+    final var bot = json.getJSONObject("discord");
+    final var permData = bot.getJSONObject("permissions");
+    final JSONObject perms = permData.getJSONObject(name());
+    for (String permName : perms.keySet()) {
+      Permission permission = Permission.valueOf(permName.toUpperCase());
+      final JSONObject permInfo = perms.getJSONObject(permName);
+      for (String roleName : permInfo.keySet()) {
+        final boolean allowed = permInfo.getBoolean(roleName);
+        final List<IPermissionHolder> holders = leaderOnly ?
+            determineLeaderPerms(roleName, team) : determineHolders(roleName, team);
+        holders.forEach(holder -> overrides.merge(holder,
+            new APermissionOverride(holder, SortedList.of(), SortedList.of()).put(permission, allowed),
+            (oldValue, newValue) -> oldValue.put(permission, allowed)
+        ));
+      }
+    }
+    return SortedList.of(overrides.values());
   }
 
-  @Nullable
-  public APermissionOverride getTeamPermission() {
-    final List<APermissionOverride> permissions = getPermissions();
-    if (permissions == null) return null;
+  @NotNull
+  private List<IPermissionHolder> determineHolders(@NotNull String key, @Nullable OrgaTeam team) {
+    long l = key.longValue();
+    if (l == -1) {
+      if (team != null)
+        if (key.equalsIgnoreCase("TEAM"))
+          return SortedList.of(team.getRoleManager().getRole());
+        else if (key.equalsIgnoreCase("LEADER"))
+          return SortedList.of(team.getActiveMemberships().stream().filter(Membership::isCaptain)
+              .map(Membership::getUser).filter(Objects::nonNull)
+              .map(DiscordUser::getMember).filter(Objects::nonNull).toList());
 
-    return permissions.stream().filter(permission -> permission.permissionHolder() instanceof Role role
-                                                     && OrgaTeamFactory.isRoleOfTeam(role)).findFirst().orElse(null);
+      l = Util.avoidNull(DiscordGroup.of(key), l, DiscordGroup::getDiscordId);
+    }
+    return SortedList.of(Jinx.instance.getRoles().getRole(l));
   }
 
-  public record APermissionOverride(IPermissionHolder permissionHolder, List<Permission> allowed, List<Permission> denied, List<Long> viewable) {
-    public APermissionOverride(IPermissionHolder permissionHolder, EnumSet<Permission> allowed, EnumSet<Permission> denied, List<Long> viewable) {
-      this(permissionHolder, SortedList.of(allowed), SortedList.of(denied), viewable);
+  @NotNull
+  private List<IPermissionHolder> determineLeaderPerms(@NotNull String key, @Nullable OrgaTeam team) {
+    if (team != null && key.equalsIgnoreCase("LEADER"))
+      return SortedList.of(team.getActiveMemberships().stream().filter(Membership::isCaptain)
+          .map(Membership::getUser).filter(Objects::nonNull)
+          .map(DiscordUser::getMember).filter(Objects::nonNull).toList());
+    return SortedList.of();
+  }
+
+  public record APermissionOverride(IPermissionHolder holder, SortedList<Permission> allowed,
+                                    SortedList<Permission> denied) {
+    public APermissionOverride(IPermissionHolder permissionHolder, EnumSet<Permission> allowed, EnumSet<Permission> denied) {
+      this(permissionHolder, SortedList.of(allowed), SortedList.of(denied));
     }
 
-    public List<Permission> getAllowed() {
-      final List<Permission> allowed = SortedList.of(allowed());
-      if (viewable.isEmpty()) allowed.remove(Permission.VIEW_CHANNEL);
-      else if (viewable.contains(permissionHolder.getIdLong())) allowed.add(Permission.VIEW_CHANNEL);
-      return allowed;
+    public APermissionOverride add(Permission permission) {
+      return put(permission, true);
     }
 
-    public List<Permission> getDenied() {
-      final List<Permission> denied = SortedList.of(denied());
-      if (viewable.isEmpty()) denied.remove(Permission.VIEW_CHANNEL);
-      else if (permissionHolder.getIdLong() == DiscordGroup.EVERYONE.getDiscordId()) denied.add(Permission.VIEW_CHANNEL);
-      return denied;
+    public APermissionOverride remove(Permission permission) {
+      return put(permission, false);
+    }
+
+    public APermissionOverride put(Permission permission, boolean add) {
+      if (add) allowed.add(permission);
+      else denied.add(permission);
+      return this;
     }
   }
 }

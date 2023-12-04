@@ -47,15 +47,15 @@ public enum DiscordChannelType {
     };
 
     channelAction.clearPermissionOverrides().queue();
-    final List<ChannelPermissionType.APermissionOverride> permissions = type.get(this).getPermissions();
+    final List<ChannelPermissionType.APermissionOverride> permissions = type.get(this).getPermissions(team);
     assert permissions != null;
     for (ChannelPermissionType.APermissionOverride permission : permissions) {
-      IPermissionHolder permissionHolder = permission.permissionHolder();
+      IPermissionHolder permissionHolder = permission.holder();
       if (permissionHolder instanceof Role role && OrgaTeamFactory.isRoleOfTeam(role)) {
         permissionHolder = team.getRoleManager().getRole();
       }
 
-      channelAction.addPermissionOverride(permissionHolder, permission.getAllowed(), permission.getDenied()).queue();
+      channelAction.addPermissionOverride(permissionHolder, permission.allowed(), permission.denied()).queue();
     }
     return channelAction;
   }

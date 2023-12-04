@@ -14,6 +14,7 @@ import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Entity;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.discord.group.CustomDiscordGroup;
+import de.xahrie.trues.api.discord.user.DiscordUser;
 import de.xahrie.trues.api.util.Util;
 import lombok.Getter;
 import lombok.NonNull;
@@ -172,5 +173,9 @@ public class OrgaTeam implements Entity<OrgaTeam>, Comparable<OrgaTeam> {
   public CustomDiscordGroup getGroup() {
     if (group == null) this.group = new Query<>(CustomDiscordGroup.class).entity(groupId);
     return group;
+  }
+
+  public List<Membership> getLeaders() {
+    return getActiveMemberships().stream().filter(Membership::isCaptain).toList();
   }
 }
