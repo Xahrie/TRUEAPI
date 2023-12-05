@@ -16,6 +16,8 @@ import de.xahrie.trues.api.util.Const;
 import de.xahrie.trues.api.util.io.request.URLType;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Setter
@@ -26,17 +28,19 @@ public class PRMLeague extends AbstractLeague implements Entity<PRMLeague> {
 
   private int prmId; // prm_id
 
-  public PRMLeague(int prmId, Stage stage, String name) {
+  public PRMLeague(int prmId, @NotNull Stage stage, @NotNull String name) {
     super(stage, name);
     this.prmId = prmId;
   }
 
-  private PRMLeague(int id, int stageId, String name, int prmId) {
+  private PRMLeague(int id, int stageId, @NotNull String name, int prmId) {
     super(id, stageId, name);
     this.prmId = prmId;
   }
 
-  public static PRMLeague get(List<Object> objects) {
+  @NotNull
+  @Contract("_ -> new")
+  public static PRMLeague get(@NotNull List<Object> objects) {
     return new PRMLeague(
         (int) objects.get(0),
         (int) objects.get(2),
@@ -53,7 +57,7 @@ public class PRMLeague extends AbstractLeague implements Entity<PRMLeague> {
   }
 
 
-  public LocalDateTime getAlternative(Playday playday) {
+  public LocalDateTime getAlternative(@NotNull Playday playday) {
     final PlaydayScheduler scheduler = PlaydayScheduler.create(getStage(), playday.getId(), getTier());
     return scheduler.defaultTime();
   }

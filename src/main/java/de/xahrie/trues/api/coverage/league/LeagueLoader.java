@@ -17,6 +17,7 @@ import de.xahrie.trues.api.coverage.team.TeamFactory;
 import de.xahrie.trues.api.coverage.team.TeamLoader;
 import de.xahrie.trues.api.util.Const;
 import de.xahrie.trues.api.util.StringUtils;
+import de.xahrie.trues.api.util.exceptions.EntryMissingException;
 import de.xahrie.trues.api.util.io.log.Console;
 import de.xahrie.trues.api.util.io.log.DevInfo;
 import de.xahrie.trues.api.util.io.request.HTML;
@@ -26,19 +27,17 @@ import org.jetbrains.annotations.NotNull;
 
 @ExtensionMethod(StringUtils.class)
 public class LeagueLoader extends GamesportsLoader {
-  public static PRMLeague season(String url, String name) {
+  public static PRMLeague season(@NotNull String url, @NotNull String name) {
     final int seasonId = url.between("/prm/", "-").intValue();
     final int stageId = url.between("/group/", "-").intValue();
     final int divisionId = url.between("/", "-", 8).intValue();
     final PRMSeason season = SeasonFactory.getSeason(seasonId);
-    if (season == null) {
-      new DevInfo("Season " + seasonId + " wurde nicht erstellt.").with(Console.class).warn();
-      return null;
-    }
+    if (season == null)
+      throw new EntryMissingException("Season " + seasonId + " wurde nicht erstellt.").info();
     return LeagueFactory.getGroup(season, name, stageId, divisionId);
   }
 
-  public static String divisionNameFromURL(String url) {
+  public static String divisionNameFromURL(@NotNull String url) {
     String section = url.after("/", -1).after("-").replace("-", " ");
     if (section.startsWith("division ")) section = section.replaces(".", section.lastIndexOf(" "));
     return section.capitalizeFirst();

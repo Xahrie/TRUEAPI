@@ -58,11 +58,11 @@ public abstract class AbstractLog<T extends AbstractLog<T>> {
   public abstract T doCommand(DiscordUser user, String command, String full);
   protected abstract T doLog();
 
-  private T log(Level level) {
+  public T log(Level level) {
     return log(level, null);
   }
 
-  private T log(Level level, Throwable throwable) {
+  public T log(Level level, Throwable throwable) {
     this.level = level;
     this.throwable = throwable;
     otherLoggers.add(this);

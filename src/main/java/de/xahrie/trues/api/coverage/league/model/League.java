@@ -9,6 +9,7 @@ import de.xahrie.trues.api.database.query.Entity;
 import de.xahrie.trues.api.database.query.Query;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Setter
@@ -17,11 +18,11 @@ public class League extends AbstractLeague implements Entity<League> {
   @Serial
   private static final long serialVersionUID = -1878025702559463286L;
 
-  public League(Stage stage, String name) {
+  public League(@NotNull Stage stage, @NotNull String name) {
     super(stage, name);
   }
 
-  private League(int id, int stageId, String name) {
+  private League(int id, int stageId, @NotNull String name) {
     super(id, stageId, name);
   }
 

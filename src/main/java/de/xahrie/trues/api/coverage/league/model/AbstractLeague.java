@@ -13,6 +13,7 @@ import de.xahrie.trues.api.database.query.Query;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Setter
@@ -20,15 +21,15 @@ import org.jetbrains.annotations.NotNull;
 public abstract class AbstractLeague implements ALeague, Id {
   private int id; // coverage_id
   protected final int stageId;
-  protected final String name; // group_name
+  @NotNull protected final String name; // group_name
 
-  public AbstractLeague(Stage stage, String name) {
+  public AbstractLeague(@NotNull Stage stage, @NotNull String name) {
     this.stage = stage;
     this.stageId = stage.getId();
     this.name = name;
   }
 
-  protected AbstractLeague(int id, int stageId, String name) {
+  protected AbstractLeague(int id, int stageId, @NotNull String name) {
     this.id = id;
     this.stageId = stageId;
     this.name = name;
@@ -67,7 +68,7 @@ public abstract class AbstractLeague implements ALeague, Id {
     return Objects.hash(getId());
   }
 
-  private Stage stage; // stage
+  @Nullable private Stage stage; // stage
 
   public Stage getStage() {
     if (stage == null) this.stage = new Query<>(Stage.class).entity(stageId);

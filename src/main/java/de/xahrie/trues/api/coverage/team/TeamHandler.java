@@ -27,6 +27,7 @@ import de.xahrie.trues.api.util.io.request.HTML;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 @ExtensionMethod(StringUtils.class)
@@ -109,7 +110,7 @@ public class TeamHandler extends TeamModel implements Serializable {
     return team.setScore(determineDivision(stages), result);
   }
 
-  private PRMLeague determineDivision(List<HTML> stages) {
+  private PRMLeague determineDivision(@NotNull List<HTML> stages) {
     final HTML content = stages.get(stages.size() - 1).find("ul", HTML.ICON_INFO).find("li").find("a");
     return LeagueLoader.season(content.getAttribute("href"), content.text());
   }

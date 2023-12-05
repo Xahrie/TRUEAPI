@@ -1,10 +1,5 @@
-package de.xahrie.trues.api.util;
+package de.xahrie.trues.api.util.exceptions;
 
-/**
- * @deprecated APIException wurde verschoben. <br>
- * Nutze nun {@link de.xahrie.trues.api.util.exceptions.APIException}
- */
-@Deprecated
 public class APIException extends RuntimeException {
   public APIException() {
     super();
