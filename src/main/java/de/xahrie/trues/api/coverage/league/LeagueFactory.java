@@ -10,9 +10,6 @@ import org.jetbrains.annotations.NotNull;
 public final class LeagueFactory {
   public static PRMLeague getGroup(@NotNull PRMSeason season, @NotNull String divisionName, int stageId, int divisionId) {
     final Stage stage = season.getStage(stageId);
-    if (stage == null)
-      throw new EntryMissingException("Stage " + stageId + " wurde nicht für Season " + season.getFullName() + " " +
-          "erstellt.").info();
     return new PRMLeague(divisionId, stage, divisionName).create();
   }
 }

@@ -79,15 +79,20 @@ public class StringUtils {
     int endIndex = value.length();
     if (start != null) {
       startIndex = ordinalIndexOf(value, start, occurrence) + start.length() - 1;
-      if (end != null) endIndex = value.indexOf(end, startIndex + 1);
-    } else if (end != null) endIndex = ordinalIndexOf(value, end, occurrence);
+      if (end != null)
+        endIndex = value.indexOf(end, startIndex + 1);
+    } else if (end != null)
+      endIndex = ordinalIndexOf(value, end, occurrence);
+
+    if (endIndex == -1)
+      endIndex = value.length();
 
     if (endIndex < startIndex) {
       final RuntimeException exception = new IndexOutOfBoundsException("Index-Fehler");
       new DevInfo().severe(exception);
       throw exception;
     }
-    if (endIndex == -1) endIndex = value.length();
+
     return value.substring(startIndex + 1, endIndex);
   }
 

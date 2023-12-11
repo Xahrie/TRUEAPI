@@ -17,12 +17,12 @@ import de.xahrie.trues.api.datatypes.calendar.TimeRange;
 import de.xahrie.trues.api.coverage.ABetable;
 import de.xahrie.trues.api.coverage.EventDTO;
 import de.xahrie.trues.api.util.Util;
+import de.xahrie.trues.api.util.exceptions.EntryMissingException;
 import de.xahrie.trues.api.util.io.log.DevInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
 @Getter
@@ -46,20 +46,22 @@ public abstract class Season implements ABetable, Id, AScheduleable, ASeason {
   }
 
   @Override
-  @NonNull
-  public Stage getStage(@NonNull Stage.StageType stageType) {
+  @NotNull
+  public Stage getStage(@NotNull Stage.StageType stageType) {
     return getStages().stream().filter(stage -> stageType.getEntityClass().isInstance(stage)).findFirst().orElseThrow();
   }
 
   @Override
-  @Nullable
+  @NotNull
   public Stage getStage(int prmId) {
     final Stage.StageType stageType = Stage.StageType.fromPrmId(prmId);
-    return Util.avoidNull(stageType, null, this::getStage);
+    if (stageType == null)
+      throw new EntryMissingException("StageType " + prmId + " nicht registriert.").info();
+    return Util.avoidNull(stageType, this::getStage);
   }
 
   @Override
-  @NonNull
+  @NotNull
   public PlayStage getStageOfId(int id) {
     for (Stage stage : getStages()) {
       final var playStage = (PlayStage) stage;
@@ -75,13 +77,13 @@ public abstract class Season implements ABetable, Id, AScheduleable, ASeason {
     if (team == null) return "kein Team gefunden";
     if (team.getSignupForSeason(this) != null) return "angemeldet";
     return getStages().stream().filter(stage -> stage instanceof SignupStage).findFirst()
-                      .map(stage -> stage.getRange().hasStarted() ? "Anmeldung gestartet" : "Anmeldung " +
-                                                                                            TimeFormat.DISCORD.of(stage.getRange().getStartTime()))
-                      .orElse("keine Anmeldung eingerichtet");
+        .map(stage -> stage.getRange().hasStarted() ? "Anmeldung gestartet" : "Anmeldung " +
+            TimeFormat.DISCORD.of(stage.getRange().getStartTime()))
+        .orElse("keine Anmeldung eingerichtet");
   }
 
   @Override
-  @NonNull
+  @NotNull
   public List<EventDTO> getEvents() {
     return new ArrayList<>(getStages().stream().map(stage -> new EventDTO(stage.getRange(), stage.type(), false)).toList()).stream().sorted().toList();
   }
