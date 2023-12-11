@@ -53,12 +53,12 @@ public class DiscordUser implements Entity<DiscordUser> {
   private int digitsWritten = 0; // msg_digits
   private int secondsOnline = 0; // seconds_online
   private boolean active = false; // active
-  private LocalDateTime lastTimeJoined; // joined#
+  private LocalDateTime lastTimeJoined; // joined
   private Integer acceptedBy; // accepted
   private short notification = 0; // notification
   private LocalDate birthday; // birthday
   private boolean notifyRank = true; // notify_rank
-  private BetStatus betStatus = BetStatus.NONE;
+  private BetStatus betStatus = BetStatus.NONE; // tippspiel
 
   public DiscordUser(long discordId, String nickname) {
     this.discordId = discordId;

@@ -17,6 +17,7 @@ public class HTML {
   public static final String MATCH_RESULT = "league-match-result";
   public static final String MATCH_SUBTITLE = "content-match-subtitles";
   public static final String MATCH_TEAMS = "content-match-head-team-top";
+  public static final String MATCH_SCORE = "content-match-head-score";
   public static final String MATCHES = "league-stage-matches";
   public static final String MATCH_TIME = "tztime";
   public static final String PLAYDAY = "widget-ticker";

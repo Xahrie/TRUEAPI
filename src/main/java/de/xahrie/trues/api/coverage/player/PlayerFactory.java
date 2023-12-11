@@ -2,6 +2,7 @@ package de.xahrie.trues.api.coverage.player;
 
 import java.util.List;
 
+import de.xahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.xahrie.trues.api.coverage.player.model.Player;
 import de.xahrie.trues.api.coverage.player.model.PlayerImpl;
 import de.xahrie.trues.api.database.query.Condition;

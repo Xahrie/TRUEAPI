@@ -11,6 +11,8 @@ import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.riot.api.RiotName;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Setter
@@ -29,7 +31,9 @@ public class PlayerImpl extends Player implements Entity<PlayerImpl> {
     super(id, puuid, summonerId, name, discordUserId, teamId, updated, played);
   }
 
-  public static PlayerImpl get(List<Object> objects) {
+  @NotNull
+  @Contract("_ -> new")
+  public static PlayerImpl get(@NotNull List<Object> objects) {
     return new PlayerImpl(
         (int) objects.get(0),
         (String) objects.get(2),
@@ -47,6 +51,10 @@ public class PlayerImpl extends Player implements Entity<PlayerImpl> {
         .col("lol_summoner", summonerId).col("lol_name", name.getName()).col("lol_tag", name.getTag())
         .col("discord_user", discordUserId).col("team", teamId).col("updated", updated).col("played", played)
         .insert(this);
+  }
+
+  public void setPRMId() {
+
   }
 
 }

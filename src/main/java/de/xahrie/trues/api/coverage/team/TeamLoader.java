@@ -31,7 +31,7 @@ public class TeamLoader extends GamesportsLoader {
     loadedTeams.clear();
   }
 
-  public static int idFromURL(String url) {
+  public static int idFromURL(@NotNull String url) {
     return Integer.parseInt(url.between("/teams/", "-"));
   }
 
@@ -54,7 +54,7 @@ public class TeamLoader extends GamesportsLoader {
     this.team = team;
   }
 
-  public TeamLoader(int teamId) {
+  private TeamLoader(int teamId) {
     super(URLType.TEAM, teamId);
   }
 

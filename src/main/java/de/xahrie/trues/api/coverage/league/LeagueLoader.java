@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 public class LeagueLoader extends GamesportsLoader {
   public static PRMLeague season(@NotNull String url, @NotNull String name) {
     final int seasonId = url.between("/prm/", "-").intValue();
-    final int stageId = url.between("/group/", "-").intValue();
+    final int stageId = url.between("/group/", "-").intValue(url.between("/playoff/", "-").intValue());
     final int divisionId = url.between("/", "-", 8).intValue();
     final PRMSeason season = SeasonFactory.getSeason(seasonId);
     if (season == null)
