@@ -22,6 +22,8 @@ import de.xahrie.trues.api.util.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
@@ -45,7 +47,9 @@ public class PRMTeam extends AbstractTeam implements Entity<PRMTeam> {
     this.record = record;
   }
 
-  public static PRMTeam get(List<Object> objects) {
+  @NotNull
+  @Contract("_ -> new")
+  public static PRMTeam get(@NotNull List<Object> objects) {
     return new PRMTeam(
         (int) objects.get(0),
         (String) objects.get(2),
@@ -89,8 +93,9 @@ public class PRMTeam extends AbstractTeam implements Entity<PRMTeam> {
   }
 
   public ModifyOutcome setScore(AbstractLeague division, String score) {
-    final TeamScore teamScore = TeamScore.of(score);
+    TeamScore teamScore = TeamScore.of(score);
     final LeagueTeam currentLeague = getCurrentLeague();
+    if (teamScore == null) teamScore = currentLeague.getScore();
     final ModifyOutcome outcome;
     if (currentLeague == null || !currentLeague.getLeague().equals(division)) outcome = ModifyOutcome.ADDED;
     else outcome = currentLeague.getScore().equals(teamScore) ? ModifyOutcome.NOTHING : ModifyOutcome.CHANGED;
@@ -99,7 +104,7 @@ public class PRMTeam extends AbstractTeam implements Entity<PRMTeam> {
     return outcome;
   }
 
-  public void setRecord(String record, short seasons) {
+  public void setRecord(@NotNull String record, short seasons) {
     final String wins = record.split(" / ")[0];
     final short winsInteger = Short.parseShort(wins);
     final String losses = record.split(" / ")[1];

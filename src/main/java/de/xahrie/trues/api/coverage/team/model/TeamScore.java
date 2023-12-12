@@ -9,14 +9,17 @@ import de.xahrie.trues.api.util.StringUtils;
 import de.xahrie.trues.api.util.Util;
 import de.xahrie.trues.api.util.io.request.URLType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public record TeamScore(Short place, Short wins, Short losses) implements Serializable, Comparable<TeamScore> {
   public static TeamScore disqualified() {
     return new TeamScore(null, null, null);
   }
 
+  @Nullable
   public static TeamScore of(String input) {
     if (input.equals("Disqualifiziert")) return TeamScore.disqualified();
+    if (input.startsWith("Qualifiziert für")) return null;
 
     String place = input.split("\\.")[0];
     if (place.contains(":")) place = StringUtils.after(place, ":");
