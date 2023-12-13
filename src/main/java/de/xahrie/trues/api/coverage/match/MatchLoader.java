@@ -6,8 +6,8 @@ import java.util.List;
 
 import de.xahrie.trues.api.coverage.GamesportsLoader;
 import de.xahrie.trues.api.coverage.league.LeagueFactory;
+import de.xahrie.trues.api.coverage.league.LeagueLoader;
 import de.xahrie.trues.api.coverage.league.model.PRMLeague;
-import de.xahrie.trues.api.coverage.match.log.MatchLogAction;
 import de.xahrie.trues.api.coverage.match.model.PRMMatch;
 import de.xahrie.trues.api.coverage.playday.Playday;
 import de.xahrie.trues.api.coverage.playday.PlaydayFactory;
@@ -106,13 +106,13 @@ public class MatchLoader extends GamesportsLoader {
     final HTML division = html.find("ul", "breadcrumbs").findAll("li").get(2);
     final String divisionName = division.text();
     final String divisionURL = division.find("a").getAttribute("href");
-    final int stageId = divisionURL.between("/group/", "-").intValue();
-    final int divisionId = divisionURL.between("/", "-", 8).intValue();
+    final int stageId = LeagueLoader.stageIdFromUrl(divisionURL);
+    final int divisionId = LeagueLoader.divisionIdFromUrl(divisionURL);
     final PRMLeague league = LeagueFactory.getGroup(season, divisionName.strip(), stageId, divisionId);
 
     final Playday playday = getPlayday(league);
     final PlaydayScheduler scheduler = PlaydayScheduler.create(league.getStage(), playday.getIdx(), league.getTier());
-    final SchedulingRange scheduling = scheduler.scheduling();
+    SchedulingRange scheduling = scheduler.scheduling();
     this.match = new PRMMatch(playday, getMatchtime(), league, scheduling, this.id).create();
     return this;
   }

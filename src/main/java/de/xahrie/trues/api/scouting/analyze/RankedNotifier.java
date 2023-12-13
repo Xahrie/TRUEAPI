@@ -33,72 +33,82 @@ public record RankedNotifier(Player player, List<Performance> playedPerformances
   private static final Map<Integer, Rank> oldRanks = Collections.synchronizedMap(new HashMap<>());
   private static LocalDateTime lastReset = LocalDateTime.now();
 
+  private void resetRankNotifier() {
+    oldRanks.clear();
+    lastReset = LocalDateTime.now();
+  }
+
   void handleNotifier(@NotNull Rank oldRank, @NotNull PlayerRank playerRank) {
     final DiscordUser user = player.getDiscordUser();
     if (user == null) return;
     if (!user.isNotifyRank()) return;
     if (user.getMember() == null) return;
+
     final Rank newRank = playerRank.getRank();
     int diff = newRank.getMMR() - oldRank.getMMR();
+    final String description = determineDescription(playerRank, user, newRank);
 
-    final Standing winrate = playerRank.getWinrate();
-    final String description;
-    if (winrate.getGames() < 10) {
-      description = "Placements: " + winrate.format(Format.ADDITIONAL) + " (noch " + (10 - winrate.getGames()) + " Games)";
-    } else if (winrate.getGames() == 10) {
-      final String message = user.getMention() + " hat die Placements mit **" + winrate + "** beendet.";
-      Jinx.instance.getChannels().getTextChannel(DefinedTextChannel.RANKED)
-          .sendMessage(message).queue();
-      description = "Placements beendet: " + winrate.format(Format.ADDITIONAL);
-    } else {
-      description = "SoloQueue: " + newRank + " - **" +
-          playerRank.getWins() + "** Siege - **" + playerRank.getLosses() +
-          "** Niederlagen (" + playerRank.getWinrate() .getWinrate() + ")";
-    }
-
-    if (handleMatch(user, diff, description)) return;
+    if (handleMatch(user, diff, description)) return; // noting played
 
     handleRankup(oldRank, playerRank, user);
     sendRankupInfo();
   }
 
+  @NotNull
+  private static String determineDescription(@NotNull PlayerRank playerRank, @NotNull DiscordUser user, Rank newRank) {
+    final Standing winrate = playerRank.getWinrate();
+    if (winrate.getGames() < Const.PLACEMENT_GAMES) {
+      int gamesRemaining = Const.PLACEMENT_GAMES - winrate.getGames();
+      return "Placements: " + winrate.format(Format.ADDITIONAL) + " (noch " + gamesRemaining + " Games)";
+    }
+
+    if (winrate.getGames() == Const.PLACEMENT_GAMES) {
+      String message = user.getMention() + " hat die Placements mit **" + winrate + "** beendet.";
+      Jinx.instance.getChannels().getTextChannel(DefinedTextChannel.RANKED).sendMessage(message).queue();
+      return "Placements beendet: " + winrate.format(Format.ADDITIONAL);
+    }
+
+    return "SoloQueue: " + newRank + " - **" + playerRank.getWins() + "** Siege - **" +
+        playerRank.getLosses() + "** Niederlagen (" + playerRank.getWinrate() .getWinrate() + ")";
+  }
+
   private void handleRankup(Rank oldRank, @NotNull PlayerRank playerRank, DiscordUser user) {
     final Rank newRank = playerRank.getRank();
 
-    if (!newRank.like(oldRank)) {
-      if (Const.RANKED_STATE.equals(RankedState.DAILY)) {
-        oldRanks.putIfAbsent(player.getId(), oldRank);
-        return;
-      }
+    if (newRank.like(oldRank)) return;
 
-      if (Const.RANKED_STATE.ordinal() < 2) {
-        if (newRank.tier().equals(Rank.RankTier.UNRANKED)) return;
+    if (Const.RANKED_STATE.equals(RankedState.DAILY)) {
+      oldRanks.putIfAbsent(player.getId(), oldRank);
+      return;
+    }
 
-        final String message = user.getMention() + " (" + player.getName() +
-            ") hat einen neuen Rank erreicht\n" + oldRank + " --> " + newRank;
-        Jinx.instance.getChannels().getTextChannel(DefinedTextChannel.RANKED)
-            .sendMessage(message).queue();
-      }
+    if (Const.RANKED_STATE.ordinal() < 2) { // Matches, Rankups
+      if (newRank.tier().equals(Rank.RankTier.UNRANKED)) return;
+
+      final String message = user.getMention() + " (" + player.getName() +
+          ") hat einen neuen Rank erreicht\n" + oldRank + " --> " + newRank;
+      Jinx.instance.getChannels().getTextChannel(DefinedTextChannel.RANKED).sendMessage(message).queue();
     }
   }
 
   private void sendRankupInfo() {
-    if (Duration.between(lastReset, LocalDateTime.now()).getSeconds() < 100 * 60) return;
+    if (Duration.between(lastReset, LocalDateTime.now()).getSeconds() < 100 * 60)
+      return; // prevent sending info two times within the same hour
 
-    final int hour = LocalTime.now().getHour();
-    if (hour != 9 && hour != 21) return;
+    int hour = LocalTime.now().getHour();
+    if (!Const.RANK_UPDATE_HOURS.contains(hour)) return;
 
     List<Player> playerList = SortedList.of(oldRanks.keySet().stream()
         .map(pId -> new Query<>(Player.class).entity(pId))
+            .filter(player -> player.getDiscordUser().isActive())
         .filter(player -> !player.getRanks().getCurrent().getRank().like(oldRanks.get(player.getId()))));
-    final List<PlayerRankChange> rankChanges = playerList.stream()
-        .map(player1 -> new PlayerRankChange(
-            player1, oldRanks.get(player.getId()), player.getRanks().getCurrent().getRank()
-        )).toList();
+    List<PlayerRankChange> rankChanges = playerList.stream()
+        .map(p -> new PlayerRankChange(p, oldRanks.get(p.getId()), p.getRanks().getCurrent().getRank())).toList();
 
     if (!playerList.isEmpty()) {
-      final EmbedBuilder builder = new EmbedBuilder().setTitle("Rankups")
-          .setDescription("Rankups letzte 12 Stunden");
+      int interval = (int) Math.round(24. / Const.RANK_UPDATE_HOURS.size());
+      final EmbedBuilder builder = new EmbedBuilder().setTitle("Rank Updates (Solo/Duo)")
+          .setDescription("Rankups letzte " + interval + " Stunden");
       new EmbedFieldBuilder<>(rankChanges.stream().filter(playerRankChange -> playerRankChange.isPromoted() == 1).toList())
           .add("Promotions", change -> change.player().getDiscordUser().getMention())
           .add("Alter Rang", change -> String.valueOf(change.oldRank()))
@@ -114,8 +124,7 @@ public record RankedNotifier(Player player, List<Performance> playedPerformances
           .sendMessageEmbeds(builder.build()).queue();
     }
 
-    oldRanks.clear();
-    lastReset = LocalDateTime.now();
+    resetRankNotifier();
   }
 
   private boolean handleMatch(@NotNull DiscordUser user, int diff, @NotNull String description) {

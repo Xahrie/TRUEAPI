@@ -78,12 +78,11 @@ public class TeamHandler extends TeamModel implements Serializable {
     return currentLeague;
   }
 
-  private void handleStarterMatches(List<HTML> stages) {
-    stages.get(stages.size() - 1)
+  private void handleStarterMatches(@NotNull List<HTML> stages) {
+    stages.getLast()
           .find("ul", HTML.MATCHES)
           .findAll("li").stream()
-          .map(match -> match.find("a").getAttribute("href").between("/matches/", "-"))
-          .map(Integer::parseInt)
+          .map(match -> MatchLoader.idFromURL(match.find("a").getAttribute("href")))
           .map(MatchFactory::getMatch).filter(Objects::nonNull)
           .map(MatchLoader::new).map(MatchLoader::load)
           .forEach(MatchHandler::update);
@@ -97,21 +96,21 @@ public class TeamHandler extends TeamModel implements Serializable {
       final var seasons = Short.parseShort(teamInfos.get(2));
       team.setRecord(teamInfos.get(1), seasons);
     } else if (teamInfos.size() == 2 && teamInfos.get(0).contains("Eingecheckt")) {
-      SignupFactory.create(team, teamInfos.get(0));
+      SignupFactory.create(team, teamInfos.getFirst());
     }
   }
 
-  private ModifyOutcome updateResult(List<HTML> stages) {
+  private ModifyOutcome updateResult(@NotNull List<HTML> stages) {
     if (stages.isEmpty()) return ModifyOutcome.NOTHING;
 
-    final String result = stages.get(stages.size() - 1)
+    final String result = stages.getLast()
         .find("ul", HTML.ICON_INFO)
         .findAll("li").get(1).text().replace("Ergebnis", "");
     return team.setScore(determineDivision(stages), result);
   }
 
   private PRMLeague determineDivision(@NotNull List<HTML> stages) {
-    final HTML content = stages.get(stages.size() - 1).find("ul", HTML.ICON_INFO).find("li").find("a");
+    final HTML content = stages.getLast().find("ul", HTML.ICON_INFO).find("li").find("a");
     return LeagueLoader.season(content.getAttribute("href"), content.text());
   }
 

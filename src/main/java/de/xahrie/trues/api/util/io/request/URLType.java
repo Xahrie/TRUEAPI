@@ -7,6 +7,7 @@ import de.xahrie.trues.api.util.io.cfg.JSON;
  */
 public enum URLType {
   LEAGUE,
+  PLAYOFF,
   MATCH,
   PLAYER,
   TEAM;

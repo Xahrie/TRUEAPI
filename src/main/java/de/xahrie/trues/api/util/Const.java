@@ -1,5 +1,6 @@
 package de.xahrie.trues.api.util;
 
+import de.xahrie.trues.api.datatypes.collections.SortedList;
 import de.xahrie.trues.api.riot.RankedState;
 
 public class Const {
@@ -21,10 +22,11 @@ public class Const {
   public static final double PREDICTION_FACTOR = .015;
   public static final boolean REGISTER_COMMANDS = false;
   public static final boolean SAVE_LOGS = false;
-  public static final String SCHEDULING_PREFIX = "<--";
   public static final boolean SHOW_SQL = false;
   public static final String THREAD_CHANNEL_START = "Scouting vs. ";
   public static final RankedState RANKED_STATE = RankedState.DAILY;
+  public static final SortedList<Integer> RANK_UPDATE_HOURS = SortedList.of(9, 21);
+  public static final int PLACEMENT_GAMES = 5;
 
   public static boolean check() {
     return true;

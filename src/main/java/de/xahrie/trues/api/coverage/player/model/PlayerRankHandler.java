@@ -12,6 +12,8 @@ import de.xahrie.trues.api.util.io.log.DevInfo;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -29,8 +31,10 @@ public class PlayerRankHandler {
     this(player, new Query<>(PlayerRank.class).where("player", player).entityList());
   }
 
-  public PlayerRank updateRank(Rank.RankTier tier, Rank.Division division, short points, int wins, int losses) {
-    final PlayerRank rank = new PlayerRank(player, tier, Rank.Division.valueOf(division.name()), points, wins, losses).create();
+  public PlayerRank updateRank(@NotNull Rank.RankTier tier, @NotNull Rank.Division division,
+                               short points, int wins, int losses) {
+    final Rank.Division rankDivision = Rank.Division.valueOf(division.name());
+    final PlayerRank rank = new PlayerRank(player, tier, rankDivision, points, wins, losses).create();
     if (ranks.stream().noneMatch(r -> r.getSeason().equals(rank.getSeason()))) ranks.add(rank);
     if (rank == null || tier.ordinal() <= rank.getRank().tier().ordinal()) return rank;
 
@@ -88,17 +92,18 @@ public class PlayerRankHandler {
     return determineRankOfFactor(maxGames, rank);
   }
 
-  private PlayerRank determineRankOfFactor(int games, PlayerRank playerRank) {
+  @NotNull
+  private PlayerRank determineRankOfFactor(int games, @NotNull PlayerRank playerRank) {
     final double factor = Math.max(1, games / 50.);
     final int mmr = playerRank.getRank().getMMR();
     final Rank rank = Rank.fromMMR(mmr);
     final TrueNumber winrate = playerRank.getWinrate().getWinrate().rate();
-    final int wins = factor == 1 ? playerRank.getWins() : Math.round(winrate.multiply(games).intValue());
+    final int wins = factor == 1 ? playerRank.getWins() : winrate.multiply(games).intValue();
     final int losses = factor == 1 ? playerRank.getLosses() : games - wins;
     return new PlayerRank(player, rank, wins, losses);
   }
 
-  private int determineGamesOfRank(PlayerRank playerRank) {
+  private int determineGamesOfRank(@NotNull PlayerRank playerRank) {
     final LocalDateTime endTime = playerRank.getSeason().getRange().getEndTime();
     final Duration between = Duration.between(endTime, LocalDateTime.now());
     if (between.isPositive()) {
@@ -112,10 +117,14 @@ public class PlayerRankHandler {
     if (ranks.isEmpty()) new PlayerHandler(null, player).updateElo();
   }
 
+  @NotNull
+  @Contract(" -> new")
   private PlayerRank unranked() {
     return new PlayerRank(player, Rank.RankTier.UNRANKED, Rank.Division.IV, (short) 0, 0, 0);
   }
 
+  @NotNull
+  @Contract(" -> new")
   private PlayerRank average() {
     return new PlayerRank(player, Rank.RankTier.SILVER, Rank.Division.I, (byte) 0, 0, 0);
   }

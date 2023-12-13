@@ -12,6 +12,7 @@ import de.xahrie.trues.api.util.Format;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serial;
@@ -25,6 +26,8 @@ public class PlayerRank implements Entity<PlayerRank>, Comparable<PlayerRank> {
   @Serial
   private static final long serialVersionUID = 4008920298892200060L;
 
+  @NotNull
+  @Contract("_ -> new")
   public static Rank fromMMR(int mmr) {
     return Rank.fromMMR(mmr);
   }
@@ -64,11 +67,11 @@ public class PlayerRank implements Entity<PlayerRank>, Comparable<PlayerRank> {
     return rank.toString() + (rank.tier().equals(Rank.RankTier.UNRANKED) ? "" : " - (" + getWinrate().format(Format.ADDITIONAL) + ")");
   }
 
-  public PlayerRank(Player player, Rank rank, int wins, int losses) {
+  public PlayerRank(Player player, @NotNull Rank rank, int wins, int losses) {
     this(player, rank.tier(), rank.division(), rank.points(), wins, losses);
   }
 
-  public PlayerRank(Player player, Rank.RankTier tier, Rank.Division division, short points, int wins, int losses) {
+  public PlayerRank(@NotNull Player player, Rank.RankTier tier, Rank.Division division, short points, int wins, int losses) {
     this.season = SeasonFactory.getCurrentSeason();
     this.seasonId = season.getId();
     this.playerId = player.getId();

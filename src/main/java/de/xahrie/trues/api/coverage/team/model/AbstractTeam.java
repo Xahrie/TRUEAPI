@@ -45,7 +45,7 @@ public abstract class AbstractTeam implements ATeam, Id, Comparable<AbstractTeam
   public Integer getLastMMR() {
     if (lastMMR == null) {
       final double averageMMR = getPlayers().stream().map(Player::getRanks).map(PlayerRankHandler::getLastRelevant).map(
-              PlayerRank::getRank).mapToInt(Rank::getMMR).average().orElse(0);
+          PlayerRank::getRank).mapToInt(Rank::getMMR).average().orElse(0);
       setLastMMR((int) Math.round(averageMMR));
     }
     return lastMMR;
@@ -66,17 +66,11 @@ public abstract class AbstractTeam implements ATeam, Id, Comparable<AbstractTeam
   }
 
   public void setName(String name) {
-    if (orgaTeam != null && !orgaTeam.getNameCreation().equals(name)) {
-      orgaTeam.setNameCreation(name);
-    }
     this.name = name;
     new Query<>(AbstractTeam.class).col("team_name", name).update(id);
   }
 
   public void setAbbreviation(String abbreviation) {
-    if (orgaTeam != null && !orgaTeam.getAbbreviation().equals(abbreviation)) {
-      orgaTeam.setAbbreviationCreation(abbreviation);
-    }
     this.abbreviation = abbreviation;
     new Query<>(AbstractTeam.class).col("team_abbr", abbreviation).update(id);
   }
@@ -111,13 +105,14 @@ public abstract class AbstractTeam implements ATeam, Id, Comparable<AbstractTeam
   }
 
   public Match nextOrLastMatch() {
-    final List<Match> matches = new Query<>(
-            Participator.class).field(SQLField.get("_coverage.coverage_id", Integer.class))
-                               .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
-                               .where("team", this).and("_coverage.active", true)
-                               .ascending("_coverage.start")
-                               .convertList(Match.class).stream().toList();
-    return matches.stream().filter(match -> match.getStart().isAfter(LocalDateTime.now())).findFirst().orElse(matches.get(matches.size() - 1));
+    final List<Match> matches = new Query<>(Participator.class)
+        .field(SQLField.get("_coverage.coverage_id", Integer.class))
+        .join(new JoinQuery<>(Participator.class, Match.class).col("coverage"))
+        .where("team", this).and("_coverage.active", true)
+        .ascending("_coverage.start")
+        .convertList(Match.class).stream().toList();
+    return matches.stream().filter(match -> match.getStart().isAfter(LocalDateTime.now()))
+        .findFirst().orElse(matches.getLast());
   }
 
   public MatchManager getMatches() {
@@ -131,7 +126,8 @@ public abstract class AbstractTeam implements ATeam, Id, Comparable<AbstractTeam
 
   @Override
   public int compareTo(@NotNull AbstractTeam o) {
-    if (this instanceof PRMTeam prmTeam && o instanceof PRMTeam oPRM) return Integer.compare(prmTeam.getPrmId(), oPRM.getPrmId());
+    if (this instanceof PRMTeam prmTeam && o instanceof PRMTeam oPRM)
+      return Integer.compare(prmTeam.getPrmId(), oPRM.getPrmId());
     return Integer.compare(getId(), o.getId());
   }
 
@@ -159,7 +155,7 @@ public abstract class AbstractTeam implements ATeam, Id, Comparable<AbstractTeam
     return new TeamAnalyzer(this, gameType, days);
   }
 
-  private final Map<AbstractLeague,LeagueTeam> storedLeagueEntries = new HashMap<>();
+  private final Map<AbstractLeague, LeagueTeam> storedLeagueEntries = new HashMap<>();
 
   public LeagueTeam getLeagueEntry(AbstractLeague league) {
     return storedLeagueEntries.computeIfAbsent(league, league1 ->

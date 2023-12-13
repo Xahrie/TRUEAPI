@@ -8,6 +8,7 @@ import de.xahrie.trues.api.coverage.playday.scheduler.PlaydayScheduler;
 import de.xahrie.trues.api.coverage.playday.Playday;
 import de.xahrie.trues.api.coverage.season.PRMSeason;
 import de.xahrie.trues.api.coverage.stage.model.PlayStage;
+import de.xahrie.trues.api.coverage.stage.model.PlayoffStage;
 import de.xahrie.trues.api.coverage.stage.model.Stage;
 import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Entity;
@@ -67,6 +68,7 @@ public class PRMLeague extends AbstractLeague implements Entity<PRMLeague> {
   }
 
   public String getUrl() {
-    return String.format(URLType.LEAGUE.getUrlName(), ((PRMSeason) getStage().getSeason()).getPrmId(), ((PlayStage) getStage()).pageId(), prmId);
+    final URLType type = getStage() instanceof PlayoffStage ? URLType.LEAGUE : URLType.PLAYOFF;
+    return String.format(type.getUrlName(), ((PRMSeason) getStage().getSeason()).getPrmId(), ((PlayStage) getStage()).pageId(), prmId);
   }
 }

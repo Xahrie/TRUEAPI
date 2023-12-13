@@ -14,14 +14,17 @@ import de.xahrie.trues.api.util.io.request.HTML;
 import de.xahrie.trues.api.util.io.request.URLType;
 import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @ExtensionMethod(StringUtils.class)
 public class PlayerLoader extends GamesportsLoader implements Loader {
-  public static int idFromURL(String url) {
+  public static int idFromURL(@NotNull String url) {
     return url.between("/users/", "-").intValue();
   }
 
+  @Nullable
   public static PlayerLoader create(int primeId) {
     final PlayerLoader loader = new PlayerLoader(primeId);
     if (loader.html == null || loader.html.text() == null) return null;

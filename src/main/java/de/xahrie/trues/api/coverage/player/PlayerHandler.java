@@ -30,11 +30,9 @@ public class PlayerHandler extends PlayerModel implements Serializable {
     final Summoner summoner = player.getRiotUser().getSummoner();
       LeagueEntry entry = null;
       if (summoner != null)
-        for (LeagueEntry leagueEntry1 : summoner.getLeagueEntry())
-          if (leagueEntry1.getQueueType().equals(GameQueueType.RANKED_SOLO_5X5)) {
-            entry = leagueEntry1;
-            break;
-          }
+        entry = summoner.getLeagueEntry().stream()
+            .filter(leagueEntry -> leagueEntry.getQueueType().equals(GameQueueType.RANKED_SOLO_5X5))
+            .findFirst().orElse(null);
       if (entry == null)
         return player.getRanks().getCurrent();
 

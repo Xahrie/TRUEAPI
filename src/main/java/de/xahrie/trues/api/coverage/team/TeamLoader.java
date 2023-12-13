@@ -82,7 +82,7 @@ public class TeamLoader extends GamesportsLoader {
     if (teamInfos.size() == 4) return null;
 
     for (HTML user : html.find("ul", HTML.PLAYERS + "-l").findAll("li")) {
-      final int primeId = user.find("a").getAttribute("href").between("/users/", "-").intValue();
+      final int primeId = PlayerLoader.idFromURL(user.find("a").getAttribute("href"));
       if (primeId == prmId) {
         final String name = user.find("div", HTML.DESCRIPTION).find("span").text();
         final PRMPlayer primePlayer = PrimePlayerFactory.getPrimePlayer(primeId, RiotName.of(name));
@@ -101,7 +101,7 @@ public class TeamLoader extends GamesportsLoader {
 
     final var players = new ArrayList<PRMPlayer>();
     for (HTML user : html.find("ul", HTML.PLAYERS + "-l").findAll("li")) {
-      final int primeId = user.find("a").getAttribute("href").between("/users/", "-").intValue();
+      final int primeId = PlayerLoader.idFromURL(user.find("a").getAttribute("href"));
       final String name = user.find("div", HTML.DESCRIPTION).find("span").text();
       final PRMPlayer player = PrimePlayerFactory.getPrimePlayer(primeId, RiotName.of(name));
       if (player != null) {

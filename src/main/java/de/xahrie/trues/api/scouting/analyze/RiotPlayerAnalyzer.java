@@ -66,11 +66,12 @@ public record RiotPlayerAnalyzer(Player player, List<Performance> playedPerforma
     }
 
     final var historyBuilder = gameType.getMatchHistory(user, player);
-    if (analyzeGames(historyBuilder, gameType)) {
-      final PlayerRank old = player.getRanks().getCurrent();
-      final PlayerRank rank = new PlayerHandler(null, player).updateElo();
-      handleNotifier(old.getRank(), rank);
-    } else player.getRanks().createRank();
+    if (analyzeGames(historyBuilder, gameType)) { // has played ranked
+      PlayerRank oldRank = player.getRanks().getCurrent();
+      PlayerRank newRank = new PlayerHandler(null, player).updateElo();
+      handleNotifier(oldRank.getRank(), newRank);
+    } else
+      player.getRanks().createRank();
     AnalyzeManager.delete(player);
     if (gameType.equals(LoaderGameType.MATCHMADE)) player.setUpdated(currentTime);
     currentPlayers.remove(Integer.valueOf(player.getId()));

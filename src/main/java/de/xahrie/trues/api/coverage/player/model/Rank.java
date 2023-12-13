@@ -2,17 +2,19 @@ package de.xahrie.trues.api.coverage.player.model;
 
 import java.util.Objects;
 
-import com.merakianalytics.orianna.types.common.Tier;
 import de.xahrie.trues.api.database.connector.Listing;
 import de.xahrie.trues.api.util.StringUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Log
 public record Rank(RankTier tier, Division division, short points) implements Comparable<Rank> {
 
+  @NotNull
+  @Contract("_ -> new")
   public static Rank fromMMR(int mmr) {
     final int tierIndex = mmr / 400;
     final RankTier rankTier = tierIndex > 9 ? RankTier.CHALLENGER : RankTier.values()[tierIndex];
@@ -23,6 +25,7 @@ public record Rank(RankTier tier, Division division, short points) implements Co
     return new Rank(rankTier, division, points);
   }
 
+  @NotNull
   @Override
   public String toString() {
     if (tier.equals(RankTier.UNRANKED)) return "Unranked";
@@ -31,7 +34,9 @@ public record Rank(RankTier tier, Division division, short points) implements Co
   }
 
   public int getMMR() {
-    return (tier.ordinal() >= RankTier.MASTER.ordinal() ? RankTier.MASTER.ordinal() * 400 : tier.ordinal() * 400 + division.getPoints())
+    return (tier.ordinal() >= RankTier.MASTER.ordinal() ?
+        RankTier.MASTER.ordinal() * 400 :
+        tier.ordinal() * 400 + division.getPoints())
         + points;
   }
 
@@ -43,7 +48,8 @@ public record Rank(RankTier tier, Division division, short points) implements Co
     return points == rank.points && tier == rank.tier && division == rank.division;
   }
 
-  public boolean like(Rank rank) {
+  @Contract(pure = true)
+  public boolean like(@NotNull Rank rank) {
     return tier == rank.tier && division == rank.division;
   }
 
