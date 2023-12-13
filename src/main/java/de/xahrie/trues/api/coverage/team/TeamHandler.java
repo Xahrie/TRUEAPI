@@ -70,7 +70,7 @@ public class TeamHandler extends TeamModel implements Serializable {
   }
 
   public AbstractLeague loadDivision() {
-    final AbstractLeague currentLeague = Util.avoidNull(team.getCurrentLeague(), null, LeagueTeam::getLeague);
+    final AbstractLeague currentLeague = Util.avoidNull(team.getCurrentLeague(), LeagueTeam::getLeague);
     if (currentLeague instanceof PRMLeague prmLeague) {
       final LeagueLoader leagueLoader = new LeagueLoader(prmLeague);
       leagueLoader.load().updateAll();

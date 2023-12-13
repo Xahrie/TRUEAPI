@@ -46,7 +46,7 @@ public class LeagueLoader extends GamesportsLoader {
 
   @NotNull
   public static Integer stageIdFromUrl(@NotNull String url) {
-    return url.between("/group/", "-").intValue(url.between("/playoff/", "-").intValue());
+    return url.between((url.contains("/group/") ? "/group/" : "/playoff/"), "/").before("-").intValue();
   }
 
   @NotNull
