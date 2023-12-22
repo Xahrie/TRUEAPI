@@ -47,8 +47,4 @@ public class DiscordChannel extends AbstractDiscordChannel implements Entity<Dis
                                             .col("channel_type", channelType).col("channel_name", name).col("permission_type", permissionType)
                                             .insert(this);
   }
-
-  public AudioChannel getVoiceChannel() {
-    return Jinx.instance.getChannels().getVoiceChannel(discordId);
-  }
 }

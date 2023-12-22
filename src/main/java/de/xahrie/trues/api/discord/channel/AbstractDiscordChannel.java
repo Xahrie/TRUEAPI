@@ -5,12 +5,14 @@ import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Id;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.discord.group.DiscordGroup;
+import de.xahrie.trues.api.discord.util.Jinx;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.java.Log;
 import net.dv8tion.jda.api.entities.IPermissionHolder;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.attribute.ICategorizableChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
@@ -45,5 +47,10 @@ public abstract class AbstractDiscordChannel implements ADiscordChannel, Id {
   public void setPermissionType(ChannelType permissionType) {
     this.permissionType = permissionType;
     new Query<>(AbstractDiscordChannel.class).col("permission_type", permissionType).update(id);
+  }
+
+
+  public AudioChannel getVoiceChannel() {
+    return Jinx.instance.getChannels().getVoiceChannel(discordId);
   }
 }

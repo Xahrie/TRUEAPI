@@ -8,7 +8,7 @@ import de.xahrie.trues.api.database.connector.SQLUtils;
 import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Entity;
 import de.xahrie.trues.api.database.query.Query;
-import de.xahrie.trues.api.discord.channel.DiscordChannel;
+import de.xahrie.trues.api.discord.channel.AbstractDiscordChannel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
@@ -35,15 +35,15 @@ public class DiscordUserActivity implements Entity<DiscordUserActivity> {
   }
 
   private final Integer channelId;
-  private DiscordChannel channel;
+  private AbstractDiscordChannel channel;
 
-  public DiscordChannel getChannel() {
+  public AbstractDiscordChannel getChannel() {
     if (channel == null)
-      this.channel = new Query<>(DiscordChannel.class).entity(channelId);
+      this.channel = new Query<>(AbstractDiscordChannel.class).entity(channelId);
     return channel;
   }
 
-  public DiscordUserActivity(@NotNull DiscordUser user, @NotNull DiscordChannel channel) {
+  public DiscordUserActivity(@NotNull DiscordUser user, @NotNull AbstractDiscordChannel channel) {
     this.user = user;
     this.userId = user.getId();
     this.channel = channel;
