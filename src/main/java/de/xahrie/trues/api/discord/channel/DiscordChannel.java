@@ -7,9 +7,13 @@ import de.xahrie.trues.api.database.connector.Table;
 import de.xahrie.trues.api.database.query.Entity;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.database.query.SQLEnum;
+import de.xahrie.trues.api.discord.util.Jinx;
+import de.xahrie.trues.api.riot.Zeri;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 
 @Getter
 @Setter
@@ -42,5 +46,9 @@ public class DiscordChannel extends AbstractDiscordChannel implements Entity<Dis
     return new Query<>(DiscordChannel.class).key("discord_id", discordId)
                                             .col("channel_type", channelType).col("channel_name", name).col("permission_type", permissionType)
                                             .insert(this);
+  }
+
+  public AudioChannel getVoiceChannel() {
+    return Jinx.instance.getChannels().getVoiceChannel(discordId);
   }
 }

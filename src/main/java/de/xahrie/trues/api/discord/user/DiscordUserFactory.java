@@ -3,6 +3,7 @@ package de.xahrie.trues.api.discord.user;
 import de.xahrie.trues.api.community.application.TeamPosition;
 import de.xahrie.trues.api.community.application.TeamRole;
 import de.xahrie.trues.api.community.member.Membership;
+import de.xahrie.trues.api.database.query.Condition;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.discord.group.RoleGranter;
 import lombok.NonNull;
@@ -34,5 +35,10 @@ public class DiscordUserFactory {
     Membership membership = user.getMemberships().stream().filter(msp -> msp.getPosition().equals(position)).findFirst().orElse(null);
     if (membership == null) membership = new Membership(user, position).create();
     membership.updateRoleAndPosition(role, position);
+  }
+
+  public static void closeAllOpenActivities() {
+    new Query<>(DiscordUserActivity.class).where(Condition.isNull("left_time"))
+        .entityList().forEach(DiscordUserActivity::leave);
   }
 }
