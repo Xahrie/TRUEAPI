@@ -149,7 +149,8 @@ public class TeamInfo {
         .filter(bool -> bool).count();
     final int incorrect = (int) lastLeague.getMatches().stream().map(match -> match.getResult().wasAcurate()).filter(Objects::nonNull)
         .filter(bool -> !bool).count();
-    builder.addField("Fehlerrate", new Standing(correct, incorrect).getWinrate().toString(), false);
+    if (builder.getFields().size() < 25)
+      builder.addField("Fehlerrate", new Standing(correct, incorrect).getWinrate().toString(), false);
     return builder.build();
   }
 

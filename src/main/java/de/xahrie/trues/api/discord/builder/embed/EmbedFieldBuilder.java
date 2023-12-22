@@ -39,6 +39,7 @@ public class EmbedFieldBuilder<T> {
   @NotNull
   private EmbedFieldBuilder<T> handleAddField(String key, String content, boolean inline) {
     if (content.isBlank()) content = "keine Daten";
+    if (fields.size() >= 25) return this;
     final var field = new MessageEmbed.Field(key, content.substring(0, Math.min(1024, content.length())), inline);
     fields.add(field);
     return this;

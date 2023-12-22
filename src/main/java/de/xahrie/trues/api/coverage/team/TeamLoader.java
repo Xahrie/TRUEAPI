@@ -54,7 +54,7 @@ public class TeamLoader extends GamesportsLoader {
     this.team = team;
   }
 
-  private TeamLoader(int teamId) {
+  public TeamLoader(int teamId) {
     super(URLType.TEAM, teamId);
   }
 
@@ -115,4 +115,39 @@ public class TeamLoader extends GamesportsLoader {
     return players;
   }
 
+  public TeamHistory getHistoryOf(String name) {
+    final List<HTML> div = html.findAll("table");
+    for (final HTML season : div) {
+      final List<HTML> rows = season.findAll("tr");
+      if (rows.size() < 3) continue;
+      final String ref = rows.get(2).findAll("td").get(1).find("a").getAttribute("href");
+      if (ref != null && ref.contains(name))
+        return historyOfHTML(season);
+    }
+    return null;
+  }
+
+  private TeamHistory historyOfHTML(HTML season) {
+    List<HTML> findAll = season.findAll("tr");
+    String kaliResult = findAll.get(1).findAll("td").get(2).text();
+    kaliResult = (kaliResult.equals("-") || kaliResult.equals("Disqualifiziert")) ?
+        null : kaliResult.between("(", "/");
+
+    String groupName = findAll.get(2).findAll("td").get(1).text();
+    groupName = groupName.contains("Starter") ? "9" : groupName.equals("-") ?
+        null : groupName.between("Division ", ".");
+
+    String groupResult = findAll.get(2).findAll("td").get(2).text();
+    groupResult = (groupResult.equals("-") || groupResult.equals("Disqualifiziert")) ? null :
+        (Objects.equals(groupName, "9") ? groupResult.between("(", "/") : groupResult.between("Rang: ", "."));
+
+    String playoff = findAll.get(3).findAll("td").get(1).text().trim();
+    playoff = playoff.equals("-") ? null : playoff.between("Division ", "-");
+
+    String playoffResult = findAll.get(3).findAll("td").get(2).text();
+    final String lastResult = playoffResult.substring(playoffResult.length() - 1);
+    Boolean hasWon = playoff == null ? null : lastResult.equals(playoff);
+    return new TeamHistory(kaliResult.intValue(), groupName.intValue(), groupResult.intValue(),
+        playoff.intValue(), hasWon);
+  }
 }

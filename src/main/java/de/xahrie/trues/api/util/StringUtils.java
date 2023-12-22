@@ -120,6 +120,7 @@ public class StringUtils {
   }
 
   public static Integer intValue(String value, Integer defaultValue) {
+    if (value == null) return defaultValue;
     final Double aDouble = doubleValue(value, Util.avoidNull(defaultValue, null, Double::valueOf));
     return Util.avoidNull(aDouble, Double::intValue);
   }
