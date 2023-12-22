@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 public class DiscordUserActivity implements Entity<DiscordUserActivity> {
   @Serial private static final long serialVersionUID = 675455029296764536L;
   @Setter private int id;
-  private final LocalDateTime joined;
+  private LocalDateTime joined;
   private LocalDateTime left;
 
   private final int userId;
@@ -77,6 +77,12 @@ public class DiscordUserActivity implements Entity<DiscordUserActivity> {
     return new Query<>(DiscordUserActivity.class)
         .col("discord_user", userId).col("discord_channel", channelId).col("join_time", joined).col("left_time", left)
         .insert(this);
+  }
+
+  public boolean join() {
+    this.joined = LocalDateTime.now();
+    new Query<>(DiscordUserActivity.class).col("join_time", joined).update(id);
+    return true;
   }
 
   public boolean leave() {
