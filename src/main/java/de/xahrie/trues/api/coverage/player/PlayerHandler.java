@@ -26,6 +26,9 @@ public class PlayerHandler extends PlayerModel implements Serializable {
     player.setSummonerName(player.getRiotUser().updateName());
   }
 
+  /**
+   * Aktualisiere Rang eines Spielers in der Datenbank
+   */
   public PlayerRank updateElo() {
     final Summoner summoner = player.getRiotUser().getSummoner();
       LeagueEntry entry = null;

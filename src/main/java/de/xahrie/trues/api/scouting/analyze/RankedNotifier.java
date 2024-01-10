@@ -82,8 +82,11 @@ public record RankedNotifier(Player player, List<Performance> playedPerformances
       return;
     }
 
-    if (Const.RANKED_STATE.ordinal() < 2) { // Matches, Rankups
+    if (Const.RANKED_STATE.hasUserMessage()) { // Matches, Rankups
       if (newRank.tier().equals(Rank.RankTier.UNRANKED)) return;
+
+      if (Const.RANKED_STATE.equals(RankedState.TIER_RANKUPS) && newRank.tier() == oldRank.tier())
+        return;
 
       final String message = user.getMention() + " (" + player.getName() +
           ") hat einen neuen Rank erreicht\n" + oldRank + " --> " + newRank;
