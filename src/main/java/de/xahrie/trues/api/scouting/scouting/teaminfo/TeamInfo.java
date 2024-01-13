@@ -49,6 +49,7 @@ import de.xahrie.trues.api.database.query.Condition;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.datatypes.calendar.TimeFormat;
 import de.xahrie.trues.api.datatypes.calendar.TimeRange;
+import de.xahrie.trues.api.datatypes.collections.SortedList;
 import de.xahrie.trues.api.discord.builder.embed.EmbedFieldBuilder;
 import de.xahrie.trues.api.util.Util;
 import lombok.AllArgsConstructor;
@@ -59,6 +60,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
 @Getter
@@ -97,17 +99,17 @@ public class TeamInfo {
     return List.of(getOverview(), getScheduling(), getNextMatch(), getDivision(), getInternCup());
   }
 
+  @NotNull
   private MessageEmbed getDivision() {
+
     final PRMSeason currentSeason = SeasonFactory.getCurrentPRMSeason();
     final AbstractTeam team = orgaTeam.getTeam();
-    if (!(team instanceof PRMTeam prmTeam)) {
+    if (!(team instanceof PRMTeam prmTeam))
       return new EmbedBuilder().setTitle("keine Division").setDescription("Das Team ist nicht auf Prime League registriert.").build();
-    }
 
     final PRMLeague lastLeague = prmTeam.getLastLeague();
-    if (lastLeague == null) {
+    if (lastLeague == null)
       return new EmbedBuilder().setTitle("keine Division").setDescription("Das Team hat nie Prime League gespielt.").build();
-    }
 
     final String signupStatus = Util.avoidNull(currentSeason, "", season -> " - " + season.getSignupStatusForTeam((PRMTeam) orgaTeam.getTeam()));
     final var builder = new EmbedBuilder()
@@ -140,17 +142,23 @@ public class TeamInfo {
     builder.addField("Standing", r.stream().map(entry -> realresults.get(entry.getKey()).toString()).collect(Collectors.joining("\n")), true);
     builder.addField("Prognose", r.stream().map(entry -> entry.getValue().toString()).collect(Collectors.joining("\n")), true);
 
-    playdayMatches.keySet().stream().sorted().forEach(playday -> new EmbedFieldBuilder<>(playdayMatches.get(playday).stream().sorted().toList())
-        .add("Spielwoche " + playday.getIdx(), match -> TimeFormat.WEEKLY.of(match.getStart()))
-        .add("Standing", match -> match.getHomeAbbr() + " vs " + match.getGuestAbbr())
-        .add("Prognose", Match::getExpectedResultString)
-        .build().forEach(builder::addField));
-    final int correct = (int) lastLeague.getMatches().stream().map(match -> match.getResult().wasAcurate()).filter(Objects::nonNull)
-        .filter(bool -> bool).count();
-    final int incorrect = (int) lastLeague.getMatches().stream().map(match -> match.getResult().wasAcurate()).filter(Objects::nonNull)
-        .filter(bool -> !bool).count();
-    if (builder.getFields().size() < 25)
+    for (Playday playday : playdayMatches.keySet()) {
+      if (builder.getFields().size() > 22)
+        break;
+      new EmbedFieldBuilder<>(playdayMatches.get(playday).stream().sorted().toList())
+          .add("Spielwoche " + playday.getIdx(), match -> TimeFormat.WEEKLY.of(match.getStart()))
+          .add("Matchup", match -> match.getHomeAbbr() + " vs " + match.getGuestAbbr())
+          .add("Ergebnis", Match::getExpectedResultString)
+          .build().forEach(builder::addField);
+    }
+
+    if (builder.getFields().size() < 25) {
+      final int correct = (int) lastLeague.getMatches().stream().map(match -> match.getResult().wasAcurate()).filter(Objects::nonNull)
+          .filter(bool -> bool).count();
+      final int incorrect = (int) lastLeague.getMatches().stream().map(match -> match.getResult().wasAcurate()).filter(Objects::nonNull)
+          .filter(bool -> !bool).count();
       builder.addField("Fehlerrate", new Standing(correct, incorrect).getWinrate().toString(), false);
+    }
     return builder.build();
   }
 
