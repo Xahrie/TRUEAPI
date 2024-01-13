@@ -24,7 +24,7 @@ public class Const {
   public static final boolean SAVE_LOGS = false;
   public static final boolean SHOW_SQL = false;
   public static final String THREAD_CHANNEL_START = "Scouting vs. ";
-  public static final RankedState RANKED_STATE = RankedState.TIER_RANKUPS;
+  public static final RankedState RANKED_STATE = RankedState.NONE; // Tier Rankups - disable bis Februar
   public static final SortedList<Integer> RANK_UPDATE_HOURS = SortedList.of(9, 21);
   public static final int PLACEMENT_GAMES = 5;
 
