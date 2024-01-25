@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import de.xahrie.trues.api.coverage.league.model.PRMLeague;
+import de.xahrie.trues.api.coverage.match.model.Match;
 import de.xahrie.trues.api.coverage.team.model.PRMTeam;
 import de.xahrie.trues.api.coverage.match.MatchHandler;
 import de.xahrie.trues.api.coverage.match.MatchLoader;
@@ -31,10 +32,11 @@ public class LeagueHandler extends LeagueModel implements Serializable {
   }
 
   public void updateMatches() {
-    if (league.isStarter()) {
+    if (league.isStarter())
       return;
-    }
+
     playdays.stream().flatMap(playday -> playday.matches().stream())
+        .filter(Match::isActive)
         .map(MatchLoader::new)
         .map(MatchLoader::load)
         .forEach(MatchHandler::update);

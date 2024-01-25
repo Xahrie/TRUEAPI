@@ -11,6 +11,7 @@ import de.xahrie.trues.api.coverage.league.model.PRMLeague;
 import de.xahrie.trues.api.coverage.match.MatchFactory;
 import de.xahrie.trues.api.coverage.match.MatchHandler;
 import de.xahrie.trues.api.coverage.match.MatchLoader;
+import de.xahrie.trues.api.coverage.match.model.Match;
 import de.xahrie.trues.api.coverage.player.model.LoaderGameType;
 import de.xahrie.trues.api.coverage.player.model.PRMPlayer;
 import de.xahrie.trues.api.coverage.player.model.Player;
@@ -83,7 +84,7 @@ public class TeamHandler extends TeamModel implements Serializable {
           .find("ul", HTML.MATCHES)
           .findAll("li").stream()
           .map(match -> MatchLoader.idFromURL(match.find("a").getAttribute("href")))
-          .map(MatchFactory::getMatch).filter(Objects::nonNull)
+          .map(MatchFactory::getMatch).filter(Objects::nonNull).filter(Match::isActive)
           .map(MatchLoader::new).map(MatchLoader::load)
           .forEach(MatchHandler::update);
   }
