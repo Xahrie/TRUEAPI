@@ -13,7 +13,7 @@ public class Const {
   }
 
   public static class Gamesports {
-    public static final String STARTER_NAME = "Swiss Starter";
+    public static final String STARTER_NAME = "Starter Gruppe";
     public static final String CALIBRATION_NAME = "Kalibrierung";
     public static final String PLAYOFF_NAME = "Playoff";
   }

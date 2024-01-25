@@ -29,8 +29,8 @@ public enum LeagueTier {
   Swiss_Starter(10);
 
   private static int idFromName(String name) {
-    if (name.startsWith("Division ")) {
-      return Integer.parseInt(name.replace("Division ", "").split("\\.")[0]);
+    if (name.startsWith("Gruppe ")) {
+      return Integer.parseInt(name.replace("Gruppe ", "").split("\\.")[0]);
     }
     return name.equals(Const.Gamesports.STARTER_NAME) ? 10 : -1;
   }

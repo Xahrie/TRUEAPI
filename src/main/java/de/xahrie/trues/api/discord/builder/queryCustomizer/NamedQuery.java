@@ -66,7 +66,8 @@ public enum NamedQuery {
               new Column("Championname", 20), new Column("Picks", 20), new Column("KDA", 15)),
                   Enumeration.CONTINUE), null),
   FACED_TEAMS(new Query<>("SELECT * FROM team WHERE 0"), new DBQuery("bisherige Gegner & Scrimteams", "Alle bisherigen Prime League Gegner und Scrimteams der Orga", List.of(
-      new Column("Placeholder", 50), new Column("Team 2", 20), new Column("Standing", 9))), new Alternative(0, List.of("Division 3", "Division 4", "Division 5", "Division 6", "Division 7", "Division 8", "Swiss Starter"))),
+      new Column("Placeholder", 50), new Column("Team 2", 20), new Column("Standing", 9))), new Alternative(0,
+      List.of("3. Liga", "4. Liga", "5. Liga", "6. Liga", "7. Liga", "8. Liga", "Starter Liga"))),
   SEASON_CHAMPIONS(new Query<>(Selection.class, 50)
       .get("_champion.champion_name as Champion1", String.class)
       .get("concat(round(count(*) * 100 / (SELECT count(DISTINCT game) FROM selection JOIN game ON selection.game = game.game_id WHERE game_type = 0 AND orgagame = true)), '% - ', (SELECT concat(SUM(team_perf.win), ' : ', SUM(NOT team_perf.win)) FROM performance JOIN player ON player = player_id JOIN team_perf ON t_perf = team_perf_id JOIN game ON game = game_id JOIN champion ON performance.champion = champion.champion_id WHERE game_type = 0 and orgagame = true AND champion.champion_name = Champion1))", String.class)
@@ -200,13 +201,13 @@ public enum NamedQuery {
 
   private List<List<Object[]>> handleFacedTeams() {
     return List.of(
-        getTeamsOfDivision("Division 3"),
-        getTeamsOfDivision("Division 4"),
-        getTeamsOfDivision("Division 5"),
-        getTeamsOfDivision("Division 6"),
-        getTeamsOfDivision("Division 7"),
-        getTeamsOfDivision("Division 8"),
-        getTeamsOfDivision("Swiss")
+        getTeamsOfDivision("Gruppe 3"),
+        getTeamsOfDivision("Gruppe 4"),
+        getTeamsOfDivision("Gruppe 5"),
+        getTeamsOfDivision("Gruppe 6"),
+        getTeamsOfDivision("Gruppe 7"),
+        getTeamsOfDivision("Gruppe 8"),
+        getTeamsOfDivision("Starter")
     );
   }
 

@@ -1,6 +1,8 @@
 package de.xahrie.trues.api.coverage.playday.scheduler;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import de.xahrie.trues.api.coverage.playday.config.PlaydayRange;
 import de.xahrie.trues.api.coverage.playday.config.SchedulingRange;
@@ -20,8 +22,13 @@ public record PlaydayScheduler(PlaydayRange playday, LocalDateTime defaultTime, 
     final var playdayRange = new PlaydayRange(playdayTimeRange.getStartTime(), playdayTimeRange.getEndTime());
 
     final var scheduling = new Scheduling(config.options());
-    final WeekdayTimeRange range = scheduling.range(tier);
-    final TimeRange schedulingTimeRange = range.nextOrCurrent(stage, index);
+    WeekdayTimeRange range = scheduling.range(tier);
+    if (range == null) {
+      range = new WeekdayTimeRange(new WeekdayTime(DayOfWeek.SUNDAY, LocalTime.of(14, 0)),
+        new WeekdayTime(DayOfWeek.SUNDAY,
+          LocalTime.of(18, 0)));
+    }
+    final var schedulingTimeRange = range.nextOrCurrent(stage, index);
     final var schedulingRange = new SchedulingRange(schedulingTimeRange.getStartTime(), schedulingTimeRange.getEndTime());
 
     final WeekdayTime timeOffset = scheduling.defaultTime(tier);

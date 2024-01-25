@@ -135,14 +135,14 @@ public class TeamLoader extends GamesportsLoader {
 
     String groupName = findAll.get(2).findAll("td").get(1).text();
     groupName = groupName.contains("Starter") ? "9" : groupName.equals("-") ?
-        null : groupName.between("Division ", ".");
+        null : groupName.between("Gruppe ", ".");
 
     String groupResult = findAll.get(2).findAll("td").get(2).text();
     groupResult = (groupResult.equals("-") || groupResult.equals("Disqualifiziert")) ? null :
         (Objects.equals(groupName, "9") ? groupResult.between("(", "/") : groupResult.between("Rang: ", "."));
 
     String playoff = findAll.get(3).findAll("td").get(1).text().trim();
-    playoff = playoff.equals("-") ? null : playoff.between("Division ", "-");
+    playoff = playoff.equals("-") ? null : playoff.between("Playoffs  ", ".");
 
     String playoffResult = findAll.get(3).findAll("td").get(2).text();
     final String lastResult = playoffResult.substring(playoffResult.length() - 1);

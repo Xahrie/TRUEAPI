@@ -132,7 +132,7 @@ public class MatchLoader extends GamesportsLoader {
     if (data.size() < 2) {
       return PlaydayFactory.fromMatchtime(league.getStage(), getMatchtime());
     }
-    final String playdayName = data.get(1).text();
+    final String playdayName = data.get(1).text().trim();
     final int index = playdayName.equals("Tiebreaker") ? 8 : playdayName.split(" ")[1].intValue();
     return PlaydayFactory.getPlayday(league.getStage(), index);
   }

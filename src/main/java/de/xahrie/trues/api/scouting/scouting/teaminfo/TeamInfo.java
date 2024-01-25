@@ -105,11 +105,12 @@ public class TeamInfo {
     final PRMSeason currentSeason = SeasonFactory.getCurrentPRMSeason();
     final AbstractTeam team = orgaTeam.getTeam();
     if (!(team instanceof PRMTeam prmTeam))
-      return new EmbedBuilder().setTitle("keine Division").setDescription("Das Team ist nicht auf Prime League registriert.").build();
+      return new EmbedBuilder().setTitle("keine Gruppe").setDescription("Das Team ist nicht auf Prime League " +
+          "registriert.").build();
 
     final PRMLeague lastLeague = prmTeam.getLastLeague();
     if (lastLeague == null)
-      return new EmbedBuilder().setTitle("keine Division").setDescription("Das Team hat nie Prime League gespielt.").build();
+      return new EmbedBuilder().setTitle("keine Gruppe").setDescription("Das Team hat nie Prime League gespielt.").build();
 
     final String signupStatus = Util.avoidNull(currentSeason, "", season -> " - " + season.getSignupStatusForTeam((PRMTeam) orgaTeam.getTeam()));
     final var builder = new EmbedBuilder()
