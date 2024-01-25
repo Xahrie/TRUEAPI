@@ -20,6 +20,7 @@ public class PlaydayCreator {
 
   public Playday create() {
     final PlaydayScheduler scheduler = PlaydayScheduler.create(stage, index, tier);
+    System.out.println(index);
     return new Playday(stage, (short) index, scheduler.playday(), ((PlayStage) stage).playdayConfig().format()).create();
   }
 

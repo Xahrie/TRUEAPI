@@ -28,6 +28,7 @@ import de.xahrie.trues.api.util.io.request.HTML;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
