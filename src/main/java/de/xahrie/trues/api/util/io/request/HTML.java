@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import de.xahrie.trues.api.util.StringUtils;
+import de.xahrie.trues.api.util.io.cfg.JSON;
 import lombok.NonNull;
 import lombok.experimental.ExtensionMethod;
 import org.jetbrains.annotations.NotNull;
+import org.jsoup.Jsoup;
 
 @ExtensionMethod(StringUtils.class)
 public class HTML {

@@ -1,14 +1,12 @@
 package de.xahrie.trues.api.util.io.request;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
 
 import lombok.extern.java.Log;
+import org.jsoup.Jsoup;
 
 @Log
-public record HTMLRequester(URL url) {
+public record HTMLRequester(String path) {
 
   public HTML html() {
     String content = determineContent();
@@ -19,16 +17,16 @@ public record HTMLRequester(URL url) {
   }
 
   private String determineContent() {
-    try (final Scanner scanner = new Scanner(this.url.openStream(), StandardCharsets.UTF_8).useDelimiter("\\A")) {
-      return scanner.hasNext() ? scanner.next() : "";
+    try {
+      return Jsoup.connect(path).get().html();
     } catch (IOException e) {
-      if (!Request.errorUrls.contains(url.getPath())) {
-        Request.errorUrls.add(url.getPath());
-        log.severe("No URL requested: " + url.getPath());
-        log.throwing(getClass().getName(), "determineContent", e);
+      log.severe("No URL requested: " + path);
+
+      if (!Request.errorUrls.contains(path)) {
+        Request.errorUrls.add(path);
+        log.throwing("Request", "requestHTML(String): HTML", e);
       }
     }
     return "";
   }
-
 }

@@ -1,7 +1,5 @@
 package de.xahrie.trues.api.util.io.request;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,20 +16,13 @@ public final class Request {
   }
 
   public static HTML requestHTML(String urlString) {
-    try {
-      if (urlString.startsWith("http")) {
-        final URL url = new URL(urlString);
-        return new HTMLRequester(url).html();
-      }
-      if (!errorUrls.contains(urlString)) {
-        errorUrls.add(urlString);
-        log.severe("No URL requested: " + urlString);
-      }
-    } catch (MalformedURLException urlException) {
-      log.severe("Wrong url");
-      log.throwing("Request", "requestHTML(String): HTML", urlException);
+    if (urlString.startsWith("http"))
+      return new HTMLRequester(urlString).html();
+
+    if (!errorUrls.contains(urlString)) {
+      errorUrls.add(urlString);
+      log.severe("No URL requested: " + urlString);
     }
     return new HTML();
   }
-
 }
