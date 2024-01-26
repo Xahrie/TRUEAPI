@@ -67,21 +67,21 @@ public final class PrimePlayerFactory {
     final String summonerId = riotUser.getSummonerId();
     if (puuid != null && summonerId != null)
       return new PRMPlayer(name, puuid, summonerId, primeId).create();
-
-    final PRMPlayer prmPlayer = (PRMPlayer) performNoPuuid(name);
-    if (prmPlayer != null) {
-      prmPlayer.setPrmUserId(primeId);
-    }
-    return prmPlayer;
+    return performNoPuuid(name, primeId);
   }
 
   @Nullable
-  private static Player performNoPuuid(RiotName name) {
-    final Player player = determineExistingPlayerFromName(name);
+  private static PRMPlayer performNoPuuid(RiotName name, int primeId) {
+    Player player = determineExistingPlayerFromName(name);
     if (player == null) return null;
 
     new PlayerHandler(null, player).updateName();
-    return determineExistingPlayerFromName(name);
+    player = determineExistingPlayerFromName(name);
+    if (player == null) return null;
+    new Query<>(Player.class).col("department", "prime").col("prm_id", primeId).update(player.getId());
+    return player instanceof PRMPlayer prmPlayer ? prmPlayer :
+        new Query<>(PRMPlayer.class).entity(player.getId());
+
   }
 
   private static Player determineExistingPlayerFromName(RiotName name) {

@@ -10,6 +10,8 @@ import de.xahrie.trues.api.database.query.Entity;
 import de.xahrie.trues.api.database.query.Query;
 import de.xahrie.trues.api.riot.api.RiotName;
 import lombok.Getter;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Table(value = "player", department = "prime")
@@ -30,7 +32,9 @@ public class PRMPlayer extends Player implements Entity<PRMPlayer> {
     this.prmUserId = prmUserId;
   }
 
-  public static PRMPlayer get(List<Object> objects) {
+  @NotNull
+  @Contract("_ -> new")
+  public static PRMPlayer get(@NotNull List<Object> objects) {
     return new PRMPlayer(
         (int) objects.get(0),
         (String) objects.get(2),
