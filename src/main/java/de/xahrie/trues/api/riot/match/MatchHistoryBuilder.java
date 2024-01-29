@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.xahrie.trues.api.riot.api.RiotUser;
+import de.xahrie.trues.api.util.exceptions.APIException;
 import no.stelar7.api.r4j.basic.constants.types.lol.GameQueueType;
 import no.stelar7.api.r4j.basic.constants.types.lol.MatchlistMatchType;
 
@@ -15,22 +16,22 @@ public record MatchHistoryBuilder(RiotUser user, LocalDateTime start, List<Strin
     this(user, start, new ArrayList<>());
   }
 
-  public MatchHistoryBuilder all() {
+  public MatchHistoryBuilder all() throws APIException {
     handleMatchList(null, null);
     return this;
   }
 
-  public MatchHistoryBuilder with(GameQueueType queueType) {
+  public MatchHistoryBuilder with(GameQueueType queueType) throws APIException {
     handleMatchList(queueType, null);
     return this;
   }
 
-  public MatchHistoryBuilder with(MatchlistMatchType matchType) {
+  public MatchHistoryBuilder with(MatchlistMatchType matchType) throws APIException {
     handleMatchList(null, matchType);
     return this;
   }
 
-  private void handleMatchList(GameQueueType queueType, MatchlistMatchType matchType) {
+  private void handleMatchList(GameQueueType queueType, MatchlistMatchType matchType) throws APIException {
     final Long startEpoch = start == null ? null : start.atZone(ZoneId.systemDefault()).toEpochSecond();
     int start = 0;
     while (true) {

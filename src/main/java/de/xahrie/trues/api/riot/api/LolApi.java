@@ -1,7 +1,5 @@
 package de.xahrie.trues.api.riot.api;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
 import de.xahrie.trues.api.datatypes.collections.SortedList;
@@ -10,13 +8,11 @@ import de.xahrie.trues.api.util.StringUtils;
 import lombok.experimental.ExtensionMethod;
 import no.stelar7.api.r4j.basic.constants.api.regions.LeagueShard;
 import no.stelar7.api.r4j.basic.constants.api.regions.RegionShard;
-import no.stelar7.api.r4j.basic.constants.types.lol.GameQueueType;
-import no.stelar7.api.r4j.basic.constants.types.lol.MatchlistMatchType;
 import no.stelar7.api.r4j.pojo.lol.clash.ClashTournament;
 import no.stelar7.api.r4j.pojo.lol.match.v5.LOLMatch;
 import no.stelar7.api.r4j.pojo.lol.summoner.Summoner;
 import no.stelar7.api.r4j.pojo.shared.RiotAccount;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @ExtensionMethod(StringUtils.class)
 public class LolApi {
@@ -57,9 +53,12 @@ public class LolApi {
     return api.getLoLAPI().getSummonerAPI().getSummonerByPUUID(LeagueShard.EUW1, puuid);
   }
 
-  Summoner getSummonerByName(RiotName name) {
+  Summoner getSummonerByName(@Nullable RiotName name) {
     if (name == null) return null;
-    return api.getLoLAPI().getSummonerAPI().getSummonerByName(LeagueShard.EUW1, name.getName());
+
+    final String riotId = name.toString();
+    if (riotId == null) return null;
+    return api.getLoLAPI().getSummonerAPI().getSummonerByName(LeagueShard.EUW1, riotId);
   }
 
   public SortedList<ClashTournament> getTournaments() {

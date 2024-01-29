@@ -19,6 +19,7 @@ import de.xahrie.trues.api.scouting.PlayerAnalyzer;
 import de.xahrie.trues.api.scouting.ScoutingGameType;
 import de.xahrie.trues.api.scouting.analyze.RiotPlayerAnalyzer;
 import de.xahrie.trues.api.util.Util;
+import de.xahrie.trues.api.util.io.log.DevInfo;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -127,7 +128,12 @@ public abstract class Player implements Comparable<Player>, Id, APlayer {
         .update(id);
   }
 
-  public void setSummonerName(@NotNull RiotName name) {
+  public void setSummonerName(@Nullable RiotName name) {
+    if (name == null) {
+      new DevInfo("Player " + id + " not found.").info();
+      return;
+    }
+
     if (!name.equals(this.name))
       new Query<>(Player.class).col("lol_name", name.getName()).col("lol_tag", name.getTag()).update(id);
     this.name = name;

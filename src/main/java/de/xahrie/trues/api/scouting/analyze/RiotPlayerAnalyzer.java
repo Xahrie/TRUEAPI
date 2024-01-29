@@ -24,6 +24,8 @@ import de.xahrie.trues.api.riot.match.RiotMatchAnalyzer;
 import de.xahrie.trues.api.riot.performance.Performance;
 import de.xahrie.trues.api.scouting.AnalyzeManager;
 import de.xahrie.trues.api.util.Util;
+import de.xahrie.trues.api.util.exceptions.APIException;
+import de.xahrie.trues.api.util.io.log.DevInfo;
 import no.stelar7.api.r4j.basic.constants.types.lol.GameQueueType;
 import no.stelar7.api.r4j.basic.constants.types.lol.MapType;
 import no.stelar7.api.r4j.pojo.lol.match.v5.LOLMatch;
@@ -61,20 +63,29 @@ public record RiotPlayerAnalyzer(Player player, List<Performance> playedPerforma
         "SELECT performance.* FROM performance JOIN team_perf tp on " +
             "performance.t_perf = tp.team_perf_id JOIN game g on tp.game = g.game_id WHERE " +
             "g.game_type <= ?").entity(List.of(GameType.CUSTOM)) == null) {
-      final var historyBuilder = new MatchHistoryBuilder(user, LocalDateTime.MIN).with(GameQueueType.CUSTOM);
-      analyzeGames(historyBuilder.get(), gameType);
+      try {
+        final var historyBuilder = new MatchHistoryBuilder(user, LocalDateTime.MIN).with(GameQueueType.CUSTOM);
+        analyzeGames(historyBuilder.get(), gameType);
+      } catch (APIException exception) {
+        new DevInfo("Cannot load summoner of " + player.getName().toString()).info(exception);
+      }
     }
 
-    final var historyBuilder = gameType.getMatchHistory(user, player);
-    if (analyzeGames(historyBuilder, gameType)) { // has played ranked
-      PlayerRank oldRank = player.getRanks().getCurrent();
-      PlayerRank newRank = new PlayerHandler(null, player).updateElo();
-      handleNotifier(oldRank.getRank(), newRank);
-    } else
-      player.getRanks().createRank();
-    AnalyzeManager.delete(player);
-    if (gameType.equals(LoaderGameType.MATCHMADE)) player.setUpdated(currentTime);
-    currentPlayers.remove(Integer.valueOf(player.getId()));
+    try {
+      final var historyBuilder = gameType.getMatchHistory(user, player);
+      if (analyzeGames(historyBuilder, gameType)) { // has played ranked
+        PlayerRank oldRank = player.getRanks().getCurrent();
+        PlayerRank newRank = new PlayerHandler(null, player).updateElo();
+        handleNotifier(oldRank.getRank(), newRank);
+      } else
+        player.getRanks().createRank();
+      AnalyzeManager.delete(player);
+      if (gameType.equals(LoaderGameType.MATCHMADE)) player.setUpdated(currentTime);
+      currentPlayers.remove(Integer.valueOf(player.getId()));
+    } catch (APIException exception) {
+      new DevInfo("Cannot load summoner of " + player.getName().toString()).info(exception);
+    }
+
     Database.connection().commit(null);
   }
 

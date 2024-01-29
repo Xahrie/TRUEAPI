@@ -7,6 +7,8 @@ import de.xahrie.trues.api.datatypes.collections.SortedList;
 import de.xahrie.trues.api.riot.Zeri;
 import de.xahrie.trues.api.util.StringUtils;
 import de.xahrie.trues.api.util.Util;
+import de.xahrie.trues.api.util.exceptions.APIException;
+import de.xahrie.trues.api.util.io.log.DevInfo;
 import lombok.experimental.ExtensionMethod;
 import no.stelar7.api.r4j.basic.constants.types.lol.GameQueueType;
 import no.stelar7.api.r4j.basic.constants.types.lol.MatchlistMatchType;
@@ -28,7 +30,8 @@ public class RiotUser {
   private RiotAccount account;
   private Summoner summoner;
 
-  public RiotAccount getAccount() {
+  @Nullable
+  public RiotAccount getAccount() { // Null wenn Account nicht in der API
     if (account == null) {
       if (puuid != null) {
         this.account = Zeri.lol().getAccountFromPuuid(puuid);
@@ -50,11 +53,11 @@ public class RiotUser {
     if (summoner == null) {
       if (puuid != null)
         this.summoner = Zeri.lol().getSummonerFromPuuid(puuid);
-      else if (name.getTag() != null) {
+      else if (name.getTag() != null) { // Name ist nicht leer
         getAccount();
         if (puuid != null)
           this.summoner = Zeri.lol().getSummonerByName(name);
-      } else
+      } else // Name konnte nicht gefunden werden
         this.summoner = Zeri.lol().getSummonerByName(name);
       if (puuid == null && summoner != null)
         this.puuid = summoner.getPUUID();
@@ -69,9 +72,12 @@ public class RiotUser {
     return puuid;
   }
 
+  @Nullable
   public RiotName updateName() {
     if (getAccount() != null)
       this.name = RiotName.of(getAccount());
+    else
+      new DevInfo("Could not load account of " + name.toString()).info();
     return name;
   }
 
@@ -96,13 +102,18 @@ public class RiotUser {
   }
 
   public SortedList<String> getMatchIds(GameQueueType queueType, MatchlistMatchType matchType, Integer start,
-                                        Long startEpoch) {
+                                        Long startEpoch) throws APIException {
     final Long endEpoch = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
     return getMatchIds(queueType, matchType, start, startEpoch, endEpoch);
   }
 
   public SortedList<String> getMatchIds(GameQueueType queueType, MatchlistMatchType matchType, Integer start,
-                                        Long startEpoch, Long endEpoch) {
+                                        Long startEpoch, Long endEpoch) throws APIException {
+    if (getSummoner() == null) {
+      final APIException apiException = new APIException("Cannot load summoner of " + name.toString());
+      new DevInfo("Cannot load summoner of " + name.toString()).info();
+      throw apiException;
+    }
     return SortedList.of(
         getSummoner().getLeagueGames()
             .withQueue(queueType).withType(matchType)

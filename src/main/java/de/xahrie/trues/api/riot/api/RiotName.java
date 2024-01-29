@@ -9,6 +9,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.ExtensionMethod;
 import no.stelar7.api.r4j.pojo.shared.RiotAccount;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
@@ -16,13 +19,20 @@ import no.stelar7.api.r4j.pojo.shared.RiotAccount;
 @ExtensionMethod(StringUtils.class)
 public class RiotName {
 
-  public static RiotName of(RiotAccount account) {
+  @NotNull
+  @Contract("_ -> new")
+  public static RiotName of(@NotNull RiotAccount account) {
     return new RiotName(account.getName(), account.getTag());
   }
+
+  @NotNull
+  @Contract("_ -> new")
   public static RiotName of(String name) {
     return new RiotName(name);
   }
 
+  @NotNull
+  @Contract("_, _ -> new")
   public static RiotName of(String name, String tag) {
     return new RiotName(name, tag);
   }
@@ -30,7 +40,7 @@ public class RiotName {
   private String name;
   private String tag;
 
-  private RiotName(String name) {
+  private RiotName(@NotNull String name) {
     String tag = null;
     if (name.contains("#")) {
        tag = name.after("#", -1);
@@ -54,7 +64,12 @@ public class RiotName {
   }
 
   @Override
+  @Nullable
   public String toString() {
-    return "%s#%s".formatted(name, tag);
+    return isEmpty() ? null : "%s#%s".formatted(name, tag);
+  }
+
+  public boolean isEmpty() {
+    return name == null || tag == null || name.isBlank() || tag.isBlank();
   }
 }
